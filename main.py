@@ -1,4 +1,3 @@
-import enum
 import libhousy
 import logging
 from enum import Enum
