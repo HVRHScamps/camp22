@@ -5,7 +5,8 @@ import string
 from enum import Enum
 from modhandler import modhandler
 robot = libhousy.robot()
-Mods = modhandler(["testme","driveforward10"])
+Mods = modhandler(["testme","driveforward10","autoPickup","autoShoot","gyroTurn","holdStill"])
+
 class robotState(Enum):
     stopped = 0
     teleop = 1
@@ -40,3 +41,10 @@ while True:
                     logging.error("Student code failed its tests!")
         case robotState.running:
             logging.debug("running student code")
+            if not Mods.modStatus[curMod]: #makes sure module passed its last test
+                curState = robotState.testing
+                continue
+            if Mods.runModule(curMod) == 1:
+                curState = robotState.stopped
+                logging.error("Student code crashed!")
+            #TODO: return to stopped on control input
