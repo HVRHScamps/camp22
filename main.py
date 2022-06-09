@@ -1,4 +1,3 @@
-from email.policy import default
 import libhousy
 import logging
 import string
