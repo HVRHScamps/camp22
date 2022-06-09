@@ -1,30 +1,37 @@
-import libhousy
 import logging
 import string
 from enum import Enum
+import libhousy
 from modhandler import modhandler
+
 robot = libhousy.robot()
-Mods = modhandler(["testme","driveforward10","autoPickup","autoShoot","gyroTurn","holdStill"])
+Mods = modhandler(["testme", "driveforward10", "autoPickup", "autoShoot", "gyroTurn", "holdStill"], robot)
+
 
 class robotState(Enum):
     stopped = 0
     teleop = 1
     testing = 2
     running = 3
+
+
 curState = robotState.stopped
 curMod: string
+
+
 def teleop():
-    #currently a stub function, need controller inputs from PyGame
+    # currently a stub function, need controller inputs from PyGame
     logging.error("no teleop code is defined!")
 
+
 while True:
-    if curState != robotState.stopped: 
+    if curState != robotState.stopped:
         robot.keepAlive()
-        robot.control.putBoolean("stop",False)
+        robot.control.putBoolean("stop", False)
     match curState:
         case robotState.stopped:
             logging.debug("robot stopped")
-            robot.control.putBoolean("stop",True)
+            robot.control.putBoolean("stop", True)
         case robotState.teleop:
             logging.debug("teleop mode")
             teleop()
@@ -33,17 +40,17 @@ while True:
             match Mods.testModule(curMod):
                 case 4:
                     curState = robotState.running
-                case (0|1):
+                case (0 | 1):
                     curState = robotState.testing
                 case _:
                     curState = robotState.stopped
                     logging.error("Student code failed its tests!")
         case robotState.running:
             logging.debug("running student code")
-            if not Mods.modStatus[curMod]: #makes sure module passed its last test
+            if not Mods.modStatus[curMod]:  # makes sure module passed its last test
                 curState = robotState.testing
                 continue
             if Mods.runModule(curMod) == 1:
                 curState = robotState.stopped
                 logging.error("Student code crashed!")
-            #TODO: return to stopped on control input
+            # TODO: return to stopped on control input
