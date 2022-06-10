@@ -2,9 +2,13 @@ import logging
 import string
 from enum import Enum
 import libhousy
+import time
+import pygame
 from modhandler import modhandler
-
+import display
+pygame.init()
 robot = libhousy.robot()
+controller = libhousy.controller()
 Mods = modhandler(["testme", "driveforward10", "autoPickup", "autoShoot", "gyroTurn", "holdStill"], robot)
 
 
@@ -20,8 +24,15 @@ curMod: string
 
 
 def teleop():
-    # currently a stub function, need controller inputs from PyGame
-    logging.error("no teleop code is defined!")
+    lthr = controller.getAxis(controller.Axis.rStickY) + controller.getAxis(controller.Axis.rStickX)
+    if abs(lthr) > 1:
+        lthr = lthr/abs(lthr)
+    rthr = controller.getAxis(controller.Axis.rStickY) - controller.getAxis(controller.Axis.rStickX)
+    if abs(rthr) > 1:
+        lthr = lthr / abs(lthr)
+    robot.lDrive.Set(lthr)
+    robot.rDrive.Set(rthr)
+    time.sleep(0.01)
 
 
 while True:
@@ -53,4 +64,7 @@ while True:
             if Mods.runModule(curMod) == 1:
                 curState = robotState.stopped
                 logging.error("Student code crashed!")
-            # TODO: return to stopped on control input
+            for event in pygame.event.get():
+                if event == pygame.JOYBUTTONDOWN:
+                    curState = robotState.stopped
+                    print("stop requested by xbox controller")

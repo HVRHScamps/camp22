@@ -1,71 +1,59 @@
-import pygame, sys
+import pygame
+import sys
 from pygame.locals import *
 
-#----any imports for controller input----
-#                                       
-#-----------------end--------------------
- 
 pygame.init()
 
-#---vars or constants for control input--
-#
-#-----------------end--------------------
-
-
-#------------output mappings-------------
-#
-#-----------------end--------------------
-
-BLUE  = (0, 0, 255)
-RED   = (255, 0, 0)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 BACKGROUND = (255, 255, 255)
- 
+
 # Screen information
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 480
- 
+
 DISPLAYSURF = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 DISPLAYSURF.fill(BACKGROUND)
 pygame.display.set_caption("Tasks")
 
-#BOXES
+# BOXES
 WIDTH = 335
 HEIGHT = 80
 TOP_MARGIN = 13
-VERTICAL_SPACING = TOP_MARGIN + HEIGHT 
+VERTICAL_SPACING = TOP_MARGIN + HEIGHT
 SIDE_MARGIN = 50
 DIST_FROM_LEFT = SIDE_MARGIN
 DIST_FROM_RIGHT = SCREEN_WIDTH - WIDTH - SIDE_MARGIN
 BORDER = 2
 
-#TEXT
+# TEXT
 TEXT_MARGIN = 80
 TEXT_FROM_LEFT = DIST_FROM_LEFT + TEXT_MARGIN
 TEXT_FROM_RIGHT = DIST_FROM_RIGHT + TEXT_MARGIN
 TEXT_SPACING = TOP_MARGIN + 25
 
-#TASK BUBBLE
+# TASK BUBBLE
 BUBBLE_MARGIN = 40
 BUBBLE_FROM_LEFT = DIST_FROM_LEFT + BUBBLE_MARGIN
 BUBBLE_FROM_RIGHT = DIST_FROM_RIGHT + BUBBLE_MARGIN
 BUBBLE_SPACING = TOP_MARGIN + 40
 
 
-
 class TaskBubble(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        super().__init__() 
+        super().__init__()
         self.image = pygame.image.load("RedRectangle.png")
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
- 
+
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-#-------relevent functions? from FRC716DemoBot--------
+
+# -------relevent functions? from FRC716DemoBot--------
 # def Controls_init():
 # def eventHandler():
 # def Stopped():
@@ -81,32 +69,31 @@ class TaskBubble(pygame.sprite.Sprite):
 # need list of modules
 # list displayed where? - same as tasks on display?
 # if so need to figure out how to traverse and then run module
-#-----------------------end---------------------------
+# -----------------------end---------------------------
 
-#CREATING TASKBUBBLES
-#column 1
+# CREATING TASKBUBBLES
+# column 1
 TB1 = TaskBubble(BUBBLE_FROM_LEFT, BUBBLE_SPACING)
 TB2 = TaskBubble(BUBBLE_FROM_LEFT, BUBBLE_SPACING + VERTICAL_SPACING)
-TB3 = TaskBubble(BUBBLE_FROM_LEFT, BUBBLE_SPACING + 2*VERTICAL_SPACING)
-TB4 = TaskBubble(BUBBLE_FROM_LEFT, BUBBLE_SPACING + 3*VERTICAL_SPACING)
-TB5 = TaskBubble(BUBBLE_FROM_LEFT, BUBBLE_SPACING + 4*VERTICAL_SPACING)
-#column 2
+TB3 = TaskBubble(BUBBLE_FROM_LEFT, BUBBLE_SPACING + 2 * VERTICAL_SPACING)
+TB4 = TaskBubble(BUBBLE_FROM_LEFT, BUBBLE_SPACING + 3 * VERTICAL_SPACING)
+TB5 = TaskBubble(BUBBLE_FROM_LEFT, BUBBLE_SPACING + 4 * VERTICAL_SPACING)
+# column 2
 TB6 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING)
 TB7 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING + VERTICAL_SPACING)
-TB8 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING + 2*VERTICAL_SPACING)
-TB9 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING + 3*VERTICAL_SPACING)
-TB10 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING + 4*VERTICAL_SPACING)
+TB8 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING + 2 * VERTICAL_SPACING)
+TB9 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING + 3 * VERTICAL_SPACING)
+TB10 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING + 4 * VERTICAL_SPACING)
 
-
-while True:   
+while True:
     pygame.display.update()
-    for event in pygame.event.get():              
+    for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
 
-    #maybe change to touchscreen, would you use mouse coordinates?
-    #or implemnt based on dictionary status instead of pressed key
+    # maybe change to touchscreen, would you use mouse coordinates?
+    # or implemnt based on dictionary status instead of pressed key
     pressed_keys = pygame.key.get_pressed()
     if pressed_keys[K_1]:
         TB1.image.fill(GREEN)
@@ -128,47 +115,47 @@ while True:
         TB9.image.fill(GREEN)
     if pressed_keys[K_0]:
         TB10.image.fill(GREEN)
-         
+
     DISPLAYSURF.fill(BACKGROUND)
 
-    #TEXT - could prob do more efficiently ehehe
+    # TEXT - could prob do more efficiently ehehe
     font = pygame.font.Font('freesansbold.ttf', 32)
-    #column 1
+    # column 1
     text = font.render('autoPickup', True, BLACK)
     DISPLAYSURF.blit(text, (TEXT_FROM_LEFT, TEXT_SPACING))
     text = font.render('autoShoot', True, BLACK)
     DISPLAYSURF.blit(text, (TEXT_FROM_LEFT, TEXT_SPACING + VERTICAL_SPACING))
     text = font.render('driveForward10', True, BLACK)
-    DISPLAYSURF.blit(text, (TEXT_FROM_LEFT, TEXT_SPACING + 2*VERTICAL_SPACING))
+    DISPLAYSURF.blit(text, (TEXT_FROM_LEFT, TEXT_SPACING + 2 * VERTICAL_SPACING))
     text = font.render('gyroTurn', True, BLACK)
-    DISPLAYSURF.blit(text, (TEXT_FROM_LEFT, TEXT_SPACING + 3*VERTICAL_SPACING))
+    DISPLAYSURF.blit(text, (TEXT_FROM_LEFT, TEXT_SPACING + 3 * VERTICAL_SPACING))
     text = font.render('holdStill', True, BLACK)
-    DISPLAYSURF.blit(text, (TEXT_FROM_LEFT, TEXT_SPACING + 4*VERTICAL_SPACING))
-    #column 2
+    DISPLAYSURF.blit(text, (TEXT_FROM_LEFT, TEXT_SPACING + 4 * VERTICAL_SPACING))
+    # column 2
     text = font.render('TASK 6', True, BLACK)
     DISPLAYSURF.blit(text, (TEXT_FROM_RIGHT, TEXT_SPACING))
     text = font.render('TASK 7', True, BLACK)
     DISPLAYSURF.blit(text, (TEXT_FROM_RIGHT, TEXT_SPACING + VERTICAL_SPACING))
     text = font.render('TASK 8', True, BLACK)
-    DISPLAYSURF.blit(text, (TEXT_FROM_RIGHT, TEXT_SPACING + 2*VERTICAL_SPACING))
+    DISPLAYSURF.blit(text, (TEXT_FROM_RIGHT, TEXT_SPACING + 2 * VERTICAL_SPACING))
     text = font.render('TASK 9', True, BLACK)
-    DISPLAYSURF.blit(text, (TEXT_FROM_RIGHT, TEXT_SPACING + 3*VERTICAL_SPACING))
+    DISPLAYSURF.blit(text, (TEXT_FROM_RIGHT, TEXT_SPACING + 3 * VERTICAL_SPACING))
     text = font.render('TASK 10', True, BLACK)
-    DISPLAYSURF.blit(text, (TEXT_FROM_RIGHT, TEXT_SPACING + 4*VERTICAL_SPACING))
+    DISPLAYSURF.blit(text, (TEXT_FROM_RIGHT, TEXT_SPACING + 4 * VERTICAL_SPACING))
 
-    #DRAWING RECTANGULAR BOXES
-    #column 1
+    # DRAWING RECTANGULAR BOXES
+    # column 1
     pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, TOP_MARGIN, WIDTH, HEIGHT), BORDER)
-    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, (VERTICAL_SPACING+TOP_MARGIN), WIDTH, HEIGHT), BORDER)
-    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, (2*VERTICAL_SPACING+TOP_MARGIN), WIDTH, HEIGHT), BORDER)
-    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, (3*VERTICAL_SPACING+TOP_MARGIN), WIDTH, HEIGHT), BORDER)
-    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, (4*VERTICAL_SPACING+TOP_MARGIN), WIDTH, HEIGHT), BORDER)
-    #column 2
+    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, (VERTICAL_SPACING + TOP_MARGIN), WIDTH, HEIGHT), BORDER)
+    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, (2 * VERTICAL_SPACING + TOP_MARGIN), WIDTH, HEIGHT), BORDER)
+    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, (3 * VERTICAL_SPACING + TOP_MARGIN), WIDTH, HEIGHT), BORDER)
+    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_LEFT, (4 * VERTICAL_SPACING + TOP_MARGIN), WIDTH, HEIGHT), BORDER)
+    # column 2
     pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, TOP_MARGIN, WIDTH, HEIGHT), BORDER)
-    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, (VERTICAL_SPACING+TOP_MARGIN), WIDTH, HEIGHT), BORDER)
-    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, (2*VERTICAL_SPACING+TOP_MARGIN), WIDTH, HEIGHT), BORDER)
-    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, (3*VERTICAL_SPACING+TOP_MARGIN), WIDTH, HEIGHT), BORDER)
-    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, (4*VERTICAL_SPACING+TOP_MARGIN), WIDTH, HEIGHT), BORDER)
+    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, (VERTICAL_SPACING + TOP_MARGIN), WIDTH, HEIGHT), BORDER)
+    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, (2 * VERTICAL_SPACING + TOP_MARGIN), WIDTH, HEIGHT), BORDER)
+    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, (3 * VERTICAL_SPACING + TOP_MARGIN), WIDTH, HEIGHT), BORDER)
+    pygame.draw.rect(DISPLAYSURF, BLACK, (DIST_FROM_RIGHT, (4 * VERTICAL_SPACING + TOP_MARGIN), WIDTH, HEIGHT), BORDER)
 
     TB1.draw(DISPLAYSURF)
     TB2.draw(DISPLAYSURF)
@@ -182,25 +169,15 @@ while True:
     TB9.draw(DISPLAYSURF)
     TB10.draw(DISPLAYSURF)
 
-    #--------from FRC716 Demo Bot-----------
+    # --------from FRC716 Demo Bot-----------
     # time.sleep(0.001)
-	# Controls_init()
-	# eventHandler()
-	# Running()
-	# Stopped()
-    #----------------end---------------------
-         
-    
+# Controls_init()
+# eventHandler()
+# Running()
+# Stopped()
+# ----------------end---------------------
 
-
-
-
-
-
-
-
-
-#-------------scratch & non important notes------------
+# -------------scratch & non important notes------------
 
 # import pygame
 # from pygame.locals import *
@@ -245,4 +222,4 @@ while True:
 # pygame.draw.ellipse(surface, color, bounding_rectangle, width)
 # pygame.draw.rect(surface, color, rectangle_tuple, width)
 
-#----------------------------end------------------------------------
+# ----------------------------end------------------------------------
