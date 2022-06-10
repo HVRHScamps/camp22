@@ -56,6 +56,8 @@ while True:
                 case _:
                     curState = robotState.stopped
                     logging.error("Student code failed its tests!")
+                    if controller.getButton(controller.Button.A):
+                        curstate = robotState.teleop
         case robotState.running:
             logging.debug("running student code")
             if not Mods.modStatus[curMod]:  # makes sure module passed its last test
