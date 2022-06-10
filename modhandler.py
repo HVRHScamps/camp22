@@ -40,15 +40,19 @@ class modhandler:
                             logging.error("Did not try to drive forward after 2s. fail.")
                             self.testStatus = 2
                     case 1:
-                        self.falseAutomaton.lDriveEncoder.value = self.falseAutomaton.lDrive.value * 10  # temporary estimation
-                        self.falseAutomaton.rDriveEncoder.value = self.falseAutomaton.rDrive.value * 10  # temporary estimation
-                        if abs(self.falseAutomaton.lDriveEncoder.value - self.falseAutomaton.rDriveEncoder.value) > 30:
+                        if round(time.time()-self.testStartTime, 5) % 2 == 0:
+                            # 16ft/s * 12in/ft * 2s/tick * throttle input
+                            # This won't be super accurate bc the drivetrain isn't exactly 16ft/s and speed does not
+                            # scale linearly with throttle input but whatever
+                            self.falseAutomaton.lDriveEncoder.value += self.falseAutomaton.lDrive.value * 192 * 2
+                            self.falseAutomaton.rDriveEncoder.value += self.falseAutomaton.rDrive.value * 192 * 2
+                        if abs(self.falseAutomaton.lDriveEncoder.value - self.falseAutomaton.rDriveEncoder.value) > 4:
                             logging.error("turned when it shouldn't")
                             self.testStatus = 2
                             self.modStatus[modulename] = False
-                        if abs(50000 - self.falseAutomaton.lDriveEncoder.Get()) < 50:
+                        if abs(120 - self.falseAutomaton.lDriveEncoder.Get()) < 4:
                             self.testStage += 1
-                        elif self.falseAutomaton.lDriveEncoder.Get() > 50050:  # TODO: replace with actual value
+                        elif self.falseAutomaton.lDriveEncoder.Get() > 124:
                             # safe to only use left drive encoder here since above we ensure they are roughly equal
                             logging.error("overshot target")
                             self.testStatus = 2
