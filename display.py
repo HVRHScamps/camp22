@@ -88,32 +88,32 @@ TB10 = TaskBubble(BUBBLE_FROM_RIGHT, BUBBLE_SPACING + 4 * VERTICAL_SPACING)
 while True:
     pygame.display.update()
     for event in pygame.event.get():
-        if event.type == QUIT:
+        if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
     # maybe change to touchscreen, would you use mouse coordinates?
     # or implemnt based on dictionary status instead of pressed key
     pressed_keys = pygame.key.get_pressed()
-    if pressed_keys[K_1]:
+    if pressed_keys[pygame.K_1]:
         TB1.image.fill(GREEN)
-    if pressed_keys[K_2]:
+    if pressed_keys[pygame.K_2]:
         TB2.image.fill(GREEN)
-    if pressed_keys[K_3]:
+    if pressed_keys[pygame.K_3]:
         TB3.image.fill(GREEN)
-    if pressed_keys[K_4]:
+    if pressed_keys[pygame.K_4]:
         TB4.image.fill(GREEN)
-    if pressed_keys[K_5]:
+    if pressed_keys[pygame.K_5]:
         TB5.image.fill(GREEN)
-    if pressed_keys[K_6]:
+    if pressed_keys[pygame.K_6]:
         TB6.image.fill(GREEN)
-    if pressed_keys[K_7]:
+    if pressed_keys[pygame.K_7]:
         TB7.image.fill(GREEN)
-    if pressed_keys[K_8]:
+    if pressed_keys[pygame.K_8]:
         TB8.image.fill(GREEN)
-    if pressed_keys[K_9]:
+    if pressed_keys[pygame.K_9]:
         TB9.image.fill(GREEN)
-    if pressed_keys[K_0]:
+    if pressed_keys[pygame.K_0]:
         TB10.image.fill(GREEN)
 
     DISPLAYSURF.fill(BACKGROUND)
@@ -169,8 +169,8 @@ while True:
     TB9.draw(DISPLAYSURF)
     TB10.draw(DISPLAYSURF)
 
-    # --------from FRC716 Demo Bot-----------
-    # time.sleep(0.001)
+# --------from FRC716 Demo Bot-----------
+# time.sleep(0.001)
 # Controls_init()
 # eventHandler()
 # Running()
