@@ -10,9 +10,11 @@ class Display:
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
     BACKGROUND = (255, 255, 255)
+
     # Screen information
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 480
+
     # BOXES
     WIDTH = 335
     HEIGHT = 80
@@ -56,6 +58,19 @@ class Display:
         for side in [self.BUBBLE_FROM_LEFT, self.BUBBLE_FROM_RIGHT]:
             for box in range(0, 5):
                 self.taskBoxes.append(self.TaskBubble(side, self.BUBBLE_SPACING + box * self.VERTICAL_SPACING))
+        # Create black borders
+        self.borders = []
+        self.borders.append(
+            self.Box(self.DISPLAYSURF, self.BLACK, (self.DIST_FROM_LEFT, self.TOP_MARGIN, self.WIDTH, self.HEIGHT),
+                     self.BORDER))
+        self.borders.append(
+            self.Box(self.DISPLAYSURF, self.BLACK, (self.DIST_FROM_RIGHT, self.TOP_MARGIN, self.WIDTH, self.HEIGHT),
+                     self.BORDER))
+        for side in [self.DIST_FROM_LEFT, self.DIST_FROM_RIGHT]:
+            for i in range(1, 5):
+                self.borders.append(
+                    self.Box(self.DISPLAYSURF, self.BLACK, (side, (i * self.VERTICAL_SPACING + self.TOP_MARGIN),
+                                                            self.WIDTH, self.HEIGHT), self.BORDER))
 
     def run(self, mods: list, statuses: dict):
         pygame.display.update()
@@ -74,17 +89,29 @@ class Display:
             if task < 5:
                 self.DISPLAYSURF.blit(text, (self.TEXT_FROM_LEFT, self.TEXT_SPACING + task * self.VERTICAL_SPACING))
             else:
-                self.DISPLAYSURF.blit(text,(self.TEXT_FROM_RIGHT, self.TEXT_SPACING + (task - 5) * self.VERTICAL_SPACING))
+                self.DISPLAYSURF.blit(text,
+                                      (self.TEXT_FROM_RIGHT, self.TEXT_SPACING + (task - 5) * self.VERTICAL_SPACING))
+        for i in self.borders:
+            i.render()
+        for i in range(0, 10):
+            self.taskBoxes[i].draw(self.DISPLAYSURF)
 
-        self.draw_boxes()
-        for i in range(0, 10): self.taskBoxes[i].draw(self.DISPLAYSURF)
+    def select_box(self, box: int):
+        for border in self.borders:
+            border.color = self.BLACK
+            border.border = self.BORDER
+        try:
+            self.borders[box].color = self.BLUE
+            self.borders[box].border = self.BORDER + 2
+        except IndexError:
+            pass
 
-    def draw_boxes(self):
-        pygame.draw.rect(self.DISPLAYSURF, self.BLACK, (self.DIST_FROM_LEFT, self.TOP_MARGIN, self.WIDTH, self.HEIGHT),
-                         self.BORDER)
-        pygame.draw.rect(self.DISPLAYSURF, self.BLACK, (self.DIST_FROM_RIGHT, self.TOP_MARGIN, self.WIDTH, self.HEIGHT),
-                         self.BORDER)
-        for side in [self.DIST_FROM_LEFT, self.DIST_FROM_RIGHT]:
-            for i in range(1, 5):
-                pygame.draw.rect(self.DISPLAYSURF, self.BLACK, (side, (i * self.VERTICAL_SPACING + self.TOP_MARGIN),
-                                                                self.WIDTH, self.HEIGHT), self.BORDER)
+    class Box:
+        def __init__(self, surf, color, sp, border):
+            self.displaysurf = surf
+            self.color = color
+            self.sp = sp
+            self.border = border
+
+        def render(self):
+            pygame.draw.rect(self.displaysurf, self.color, self.sp, self.border)
