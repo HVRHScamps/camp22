@@ -12,7 +12,7 @@ class modhandler:
         self.robot = robot
         self.studentModules = studentmods
         self.testStatus = 0
-        # 0- not running, 1- running, 2-failed requirements, 3-runtime error 4-pass
+        # 0- not running, 1- running, 2-failed requirements, 3-runtime error, 4-pass
         self.testStartTime = 0
         self.testStage = 0
         self.runningTests = 0

@@ -60,13 +60,8 @@ class Display:
                 self.taskBoxes.append(self.TaskBubble(side, self.BUBBLE_SPACING + box * self.VERTICAL_SPACING))
         # Create black borders
         self.borders = []
-        self.borders.append(
-            self.Box(self.DISPLAYSURF, self.BLACK, (self.DIST_FROM_LEFT, self.TOP_MARGIN, self.WIDTH, self.HEIGHT),
-                     self.BORDER))
-        self.borders.append(
-            self.Box(self.DISPLAYSURF, self.BLACK, (self.DIST_FROM_RIGHT, self.TOP_MARGIN, self.WIDTH, self.HEIGHT),
-                     self.BORDER))
         for side in [self.DIST_FROM_LEFT, self.DIST_FROM_RIGHT]:
+            self.borders.append(self.Box(self.DISPLAYSURF, self.BLACK, (side, self.TOP_MARGIN, self.WIDTH, self.HEIGHT),self.BORDER))
             for i in range(1, 5):
                 self.borders.append(
                     self.Box(self.DISPLAYSURF, self.BLACK, (side, (i * self.VERTICAL_SPACING + self.TOP_MARGIN),
