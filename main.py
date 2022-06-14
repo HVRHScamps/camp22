@@ -8,7 +8,7 @@ import display
 
 robot = libhousy.robot()
 controller = libhousy.controller()
-Mods = modhandler(["testme", "driveforward10", "autoPickup", "autoShoot", "gyroTurn", "holdStill"], robot)
+Mods = modhandler(["driveforward10", "autoPickup", "manualShoot", "autoShoot", "gyroTurn", "holdStill"], robot)
 screen = display.Display()
 
 
@@ -21,9 +21,11 @@ class RobotState(Enum):
 
 curState = RobotState.stopped
 curMod = [Mods.studentModules[0], 0]
+to_shoot_toggle = False
 
 
 def teleop():
+    global to_shoot_toggle
     lthr = controller.getAxis(controller.Axis.rStickY) + controller.getAxis(controller.Axis.rStickX)
     if abs(lthr) > 1:
         lthr = lthr / abs(lthr)
@@ -32,6 +34,36 @@ def teleop():
         rthr = rthr / abs(rthr)
     robot.lDrive.Set(lthr)
     robot.rDrive.Set(rthr)
+    robot.shootWheel.Set(int(to_shoot_toggle))
+    if controller.getButton(controller.Button.rBumper):
+        to_shoot_toggle = not to_shoot_toggle
+    if controller.getAxis(controller.Axis.rTrigger) > 0.8:
+        robot.pickupMotor.Set(1)
+        robot.pickupPneumatic.Extend()
+        robot.beltZ1.Set(-0.8)
+        robot.beltZ2.Set(0)
+        robot.beltZ3.Set(0)
+        robot.upperTension.Retract()
+        robot.lowerTension.Extend()
+    elif controller.getAxis(controller.Axis.lTrigger) > 0.8 and to_shoot_toggle:
+        robot.beltZ1.Set(-0.8)
+        robot.beltZ2.Set(-0.8)
+        robot.beltZ3.Set(1)
+        robot.upperTension.Extend()
+        robot.lowerTension.Retract()
+    else:
+        robot.pickupMotor.Set(0)
+        robot.pickupPneumatic.Retract()
+        robot.beltZ1.Set(0)
+        robot.beltZ2.Set(0)
+        robot.beltZ3.Set(0)
+    if controller.getAxis(controller.Axis.rStickX) > 0.4:
+        robot.shootAngle.Extend()
+    elif controller.getAxis(controller.Axis.rStickX) < -0.4:
+        robot.shootAngle.Retract()
+    else:
+        robot.shootAngle.Stop()
+
     time.sleep(0.01)
 
 
@@ -97,9 +129,16 @@ while True:
             if not Mods.modStatus[curMod[0]]:  # makes sure module passed its last test
                 curState = RobotState.testing
                 continue
-            if Mods.runModule(curMod[0]) == 1:
-                curState = RobotState.stopped
-                logging.error("Student code crashed!")
+            match Mods.runModule(curMod[0]):
+                case 0:
+                    break
+                case 1:
+                    curState = RobotState.stopped
+                    logging.error("Student code crashed!")
+                    Mods.modStatus.update(curMod[0], False)  # make note of failure
+                case 2:
+                    curState = RobotState.stopped
+                    logging.info("Student code exited gracefully")
             for event in pygame.event.get():
                 if event == pygame.CONTROLLERBUTTONDOWN:
                     curState = RobotState.stopped

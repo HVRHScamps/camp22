@@ -108,11 +108,12 @@ class modhandler:
         return self.testStatus
 
     def runModule(self, modulename: string):
-        """Returns: 0 - running, 1 - internal fault"""
+        """Returns: 0 - running, 1 - internal fault 2 - done"""
         subject = self.mods[modulename]
         importlib.reload(subject)
         try:
-            subject.main(self.robot)
+            if subject.main(self.robot) == 2:
+                return 2
         except:
             return 1
         return 0
