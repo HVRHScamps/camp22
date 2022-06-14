@@ -9,7 +9,7 @@ from teleop import Teleop
 
 robot = libhousy.robot()
 controller = libhousy.controller()
-Mods = modhandler(["driveforward10", "autoPickup", "manualShoot", "autoShoot", "gyroTurn", "holdStill"], robot)
+Mods = modhandler(["driveforward10", "autoPickup", "manualShoot", "autoShoot", "gyroTurn", "holdStill", "ph1", "ph2", "ph3", "ph4"], robot)
 screen = display.Display()
 to = Teleop(robot)
 

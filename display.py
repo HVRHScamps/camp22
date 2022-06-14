@@ -49,7 +49,7 @@ class Display:
 
     def __init__(self):
         pygame.init()
-        self.DISPLAYSURF = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        self.DISPLAYSURF = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT),pygame.FULLSCREEN)
         self.DISPLAYSURF.fill(self.BACKGROUND)
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         pygame.display.set_caption("Tasks")
