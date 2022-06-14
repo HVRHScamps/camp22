@@ -5,11 +5,13 @@ import time
 import pygame
 from modhandler import modhandler
 import display
+from teleop import Teleop
 
 robot = libhousy.robot()
 controller = libhousy.controller()
 Mods = modhandler(["driveforward10", "autoPickup", "manualShoot", "autoShoot", "gyroTurn", "holdStill"], robot)
 screen = display.Display()
+to = Teleop(robot)
 
 
 class RobotState(Enum):
@@ -21,49 +23,18 @@ class RobotState(Enum):
 
 curState = RobotState.stopped
 curMod = [Mods.studentModules[0], 0]
-to_shoot_toggle = False
 
 
 def teleop():
-    global to_shoot_toggle
-    lthr = controller.getAxis(controller.Axis.rStickY) + controller.getAxis(controller.Axis.rStickX)
-    if abs(lthr) > 1:
-        lthr = lthr / abs(lthr)
-    rthr = controller.getAxis(controller.Axis.rStickY) - controller.getAxis(controller.Axis.rStickX)
-    if abs(rthr) > 1:
-        rthr = rthr / abs(rthr)
-    robot.lDrive.Set(lthr)
-    robot.rDrive.Set(rthr)
-    robot.shootWheel.Set(int(to_shoot_toggle))
-    if controller.getButton(controller.Button.rBumper):
-        to_shoot_toggle = not to_shoot_toggle
+    to.drive(controller.getAxis(controller.Axis.rStickX),controller.getAxis(controller.Axis.rStickY))
+    robot.shootWheel.Set(int(controller.getButton(controller.Button.rBumper)))
     if controller.getAxis(controller.Axis.rTrigger) > 0.8:
-        robot.pickupMotor.Set(1)
-        robot.pickupPneumatic.Extend()
-        robot.beltZ1.Set(-0.8)
-        robot.beltZ2.Set(0)
-        robot.beltZ3.Set(0)
-        robot.upperTension.Retract()
-        robot.lowerTension.Extend()
-    elif controller.getAxis(controller.Axis.lTrigger) > 0.8 and to_shoot_toggle:
-        robot.beltZ1.Set(-0.8)
-        robot.beltZ2.Set(-0.8)
-        robot.beltZ3.Set(1)
-        robot.upperTension.Extend()
-        robot.lowerTension.Retract()
+        to.pickup()
+    elif controller.getAxis(controller.Axis.lTrigger) > 0.8 and controller.getButton(controller.Button.rBumper):
+        to.shoot()
     else:
-        robot.pickupMotor.Set(0)
-        robot.pickupPneumatic.Retract()
-        robot.beltZ1.Set(0)
-        robot.beltZ2.Set(0)
-        robot.beltZ3.Set(0)
-    if controller.getAxis(controller.Axis.rStickX) > 0.4:
-        robot.shootAngle.Extend()
-    elif controller.getAxis(controller.Axis.rStickX) < -0.4:
-        robot.shootAngle.Retract()
-    else:
-        robot.shootAngle.Stop()
-
+        to.stop()
+    to.anglehood(controller.getAxis(controller.Axis.rStickX))
     time.sleep(0.01)
 
 
