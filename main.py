@@ -54,24 +54,25 @@ while True:
             logging.debug("robot stopped")
             robot.control.putBoolean("stop", True)
             for event in pygame.event.get():
-                match event:
-                    case pygame.CONTROLLER_BUTTON_DPAD_LEFT | pygame.CONTROLLER_BUTTON_DPAD_RIGHT:
-                        if curMod[1] < 5:
-                            newMod = curMod[1] + 5
-                        else:
-                            newMod = curMod[1] - 5
+                match event.type:
+                    case pygame.JOYHATMOTION:
+                        match event.value:
+                            case (1, 0) | (-1, 0):
+                                if curMod[1] < 5:
+                                    newMod = curMod[1] + 5
+                                    pygame.JOYHATMOTION
+                                else:
+                                    newMod = curMod[1] - 5
+                            case (0, -1):
+                                newMod = curMod[1] + 1
+                                if newMod > 9:
+                                    newMod = 0
+                            case (0, 1):
+                                newMod = curMod[1] - 1
+                                if newMod < 0:
+                                    newMod = 9
                         set_mod(newMod)
-                    case pygame.CONTROLLER_BUTTON_DPAD_DOWN:
-                        newMod = curMod[1] + 1
-                        if newMod > 9:
-                            newMod = 0
-                        set_mod(newMod)
-                    case pygame.CONTROLLER_BUTTON_DPAD_UP:
-                        newMod = curMod[1] - 1
-                        if newMod < 0:
-                            newMod = 9
-                        set_mod(newMod)
-                    case pygame.CONTROLLERBUTTONDOWN:
+                    case pygame.JOYBUTTONDOWN:
                         if controller.getButton(controller.Button.A):
                             curState = RobotState.testing
                             # TODO: switch sense hat mode
@@ -111,6 +112,6 @@ while True:
                     curState = RobotState.stopped
                     logging.info("Student code exited gracefully")
             for event in pygame.event.get():
-                if event == pygame.CONTROLLERBUTTONDOWN:
+                if event.type == pygame.CONTROLLERBUTTONDOWN:
                     curState = RobotState.stopped
                     print("stop requested by xbox controller")
