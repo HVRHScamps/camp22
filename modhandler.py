@@ -67,7 +67,7 @@ class modhandler:
                         self.modStatus[modulename] = True
                         logging.info("passed all tests")
 
-            case "holdStill":
+            case "holdStill":  # TODO : add timeout!
                 match self.testStage:
                     case 0:
                         self.falseAutomaton.lDriveEncoder.value = 0

@@ -80,8 +80,9 @@ while True:
                         if controller.getButton(controller.Button.A):
                             curState = RobotState.testing
                             # TODO: switch sense hat mode
-                        if controller.getButton(controller.Button.hamburger):
+                        if controller.getButton(controller.Button.B):
                             curState = RobotState.teleop
+                            to.switchback = False
 
         case RobotState.teleop:
             logging.debug("teleop mode")
