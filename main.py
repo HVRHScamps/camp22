@@ -65,7 +65,7 @@ while True:
                             case (0, -1):
                                 newMod = curMod[1] + 1
                                 if newMod > 9:
-                                    newMod = 0
+                                    newMod = curMod[1]
                             case (0, 1):
                                 newMod = curMod[1] - 1
                                 if newMod < 0:
@@ -77,7 +77,7 @@ while True:
                         if controller.getButton(controller.Button.A):
                             curState = RobotState.testing
                             # TODO: switch sense hat mode
-                        if controller.getButton(controller.Button.hamburger):
+                        if controller.getButton(controller.Button.B):
                             curState = RobotState.teleop
 
         case RobotState.teleop:
