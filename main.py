@@ -8,10 +8,13 @@ import display
 from teleop import Teleop
 
 robot = libhousy.robot()
-Mods = modhandler(["driveforward10", "autoPickup", "manualShoot", "autoShoot", "gyroTurn", "holdStill", "ph1", "ph2", "ph3", "ph4"], robot)
+Mods = modhandler(
+    ["driveforward10", "autoPickup", "manualShoot", "autoShoot", "gyroTurn", "holdStill", "ph1", "ph2", "ph3", "ph4"],
+    robot)
 screen = display.Display()
 controller = libhousy.controller()
 to = Teleop(robot)
+logging.basicConfig(level=logging.INFO)
 
 
 class RobotState(Enum):
@@ -26,7 +29,7 @@ curMod = [Mods.studentModules[0], 0]
 
 
 def teleop():
-    to.drive(controller.getAxis(controller.Axis.rStickX),controller.getAxis(controller.Axis.rStickY))
+    to.drive(controller.getAxis(controller.Axis.rStickX), controller.getAxis(controller.Axis.rStickY))
     robot.shootWheel.Set(int(controller.getButton(controller.Button.rBumper)))
     if controller.getAxis(controller.Axis.lTrigger) > 0.8:
         to.pickup()
