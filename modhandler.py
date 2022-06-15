@@ -99,6 +99,7 @@ class modhandler:
             case _:
                 logging.warning("No testing profile defined for module")
                 logging.warning("running stability-only test")
+                self.testStatus = 4
                 self.modStatus[modulename] = True  # assume true until the except below proves otherwise
         try:
             subject.main(self.falseAutomaton)

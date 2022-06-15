@@ -71,13 +71,13 @@ while True:
                                 if newMod < 0:
                                     newMod = 9
                             case default:
-                                newMod = 0
+                                newMod = curMod[1]
                         set_mod(newMod)
                     case pygame.JOYBUTTONDOWN:
                         if controller.getButton(controller.Button.A):
                             curState = RobotState.testing
                             # TODO: switch sense hat mode
-                        if controller.getButton(controller.Button.B):
+                        if controller.getButton(controller.Button.hamburger):
                             curState = RobotState.teleop
 
         case RobotState.teleop:
