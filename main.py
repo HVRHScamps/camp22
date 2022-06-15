@@ -28,13 +28,13 @@ curMod = [Mods.studentModules[0], 0]
 def teleop():
     to.drive(controller.getAxis(controller.Axis.rStickX),controller.getAxis(controller.Axis.rStickY))
     robot.shootWheel.Set(int(controller.getButton(controller.Button.rBumper)))
-    if controller.getAxis(controller.Axis.rTrigger) > 0.8:
+    if controller.getAxis(controller.Axis.lTrigger) > 0.8:
         to.pickup()
-    elif controller.getAxis(controller.Axis.lTrigger) > 0.8 and controller.getButton(controller.Button.rBumper):
+    elif controller.getAxis(controller.Axis.rTrigger) > 0.8 and controller.getButton(controller.Button.rBumper):
         to.shoot()
     else:
         to.stop()
-    to.anglehood(controller.getAxis(controller.Axis.rStickX))
+    to.anglehood(controller.getAxis(controller.Axis.lStickY))
     time.sleep(0.01)
 
 
@@ -60,7 +60,6 @@ while True:
                             case (1, 0) | (-1, 0):
                                 if curMod[1] < 5:
                                     newMod = curMod[1] + 5
-                                    pygame.JOYHATMOTION
                                 else:
                                     newMod = curMod[1] - 5
                             case (0, -1):
@@ -71,6 +70,8 @@ while True:
                                 newMod = curMod[1] - 1
                                 if newMod < 0:
                                     newMod = 9
+                            case default:
+                                newMod = 0
                         set_mod(newMod)
                     case pygame.JOYBUTTONDOWN:
                         if controller.getButton(controller.Button.A):
