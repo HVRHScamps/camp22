@@ -3,6 +3,8 @@ import libhousy
 import string
 import time
 import logging
+import sys
+import subprocess
 
 
 class modhandler:
@@ -20,6 +22,7 @@ class modhandler:
         self.mods = {}
         self.modStatus = {}
         for mod in self.studentModules:
+            sys.path.append("/home/robo/Documents/{}".format(mod))
             self.mods.update({mod: importlib.import_module(mod)})
             self.modStatus.update({mod: False})
 
@@ -28,6 +31,12 @@ class modhandler:
             self.testStartTime = time.time()
             self.runningTests = 1
             self.testStage = 0
+        git = subprocess.Popen(["git", "pull"], cwd="/home/robo/Docuemnts/{}".format(modulename))
+        try:
+            git.wait(5)
+        except subprocess.TimeoutExpired:
+            logging.warning("Git pull did not work, using last fetched version")
+            pass
         subject = self.mods[modulename]
         importlib.reload(subject)
         match modulename:
@@ -40,7 +49,7 @@ class modhandler:
                             logging.error("Did not try to drive forward after 2s. fail.")
                             self.testStatus = 2
                     case 1:
-                        if round(time.time()-self.testStartTime, 5) % 2 == 0:
+                        if round(time.time() - self.testStartTime, 5) % 2 == 0:
                             # 16ft/s * 12in/ft * 2s/tick * throttle input
                             # This won't be super accurate bc the drivetrain isn't exactly 16ft/s and speed does not
                             # scale linearly with throttle input but whatever
@@ -103,7 +112,8 @@ class modhandler:
                 self.modStatus[modulename] = True  # assume true until the except below proves otherwise
         try:
             subject.main(self.falseAutomaton)
-        except:
+        except Exception as err:
+            logging.error("Testing student module failed due to {}".format(err))
             self.modStatus[modulename] = False
             return 3
         return self.testStatus
@@ -115,6 +125,13 @@ class modhandler:
         try:
             if subject.main(self.robot) == 2:
                 return 2
-        except:
+        except Exception as err:
+            logging.error("Running student module failed due to {}".format(err))
+            self.modStatus[modulename] = False
             return 1
         return 0
+
+    def reset(self):
+        self.testStatus = 0
+        self.testStage = 0
+        self.testStartTime = 0

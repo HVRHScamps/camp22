@@ -14,7 +14,7 @@ Mods = modhandler(
 screen = display.Display()
 controller = libhousy.controller()
 to = Teleop(robot)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.INFO)
 
 
 class RobotState(Enum):
@@ -56,6 +56,7 @@ while True:
         case RobotState.stopped:
             logging.debug("robot stopped")
             robot.control.putBoolean("stop", True)
+            Mods.reset()
             for event in pygame.event.get():
                 match event.type:
                     case pygame.JOYHATMOTION:
@@ -83,6 +84,8 @@ while True:
                         if controller.getButton(controller.Button.B):
                             curState = RobotState.teleop
                             to.switchback = False
+                        if controller.getButton(controller.Button.Y):
+                            curState = RobotState.running
 
         case RobotState.teleop:
             logging.debug("teleop mode")
@@ -99,12 +102,15 @@ while True:
                 case _:
                     curState = RobotState.stopped
                     logging.error("Student code failed its tests!")
-                    if controller.getButton(controller.Button.A):
-                        curstate = RobotState.teleop
+            if time.time() - Mods.testStartTime > 45:
+                logging.error("Test overran allotted time. Fail.")
+                Mods.modStatus.update({curMod[0]: False})
+                curState = RobotState.stopped
         case RobotState.running:
             logging.debug("running student code")
             if not Mods.modStatus[curMod[0]]:  # makes sure module passed its last test
-                curState = RobotState.testing
+                logging.warning("Module {} has not passed its tests and cannot be run. Abort.".format(curMod[0]))
+                curState = RobotState.stopped
                 continue
             match Mods.runModule(curMod[0]):
                 case 0:
