@@ -24,8 +24,38 @@ class RobotState(Enum):
     running = 3
 
 
+class leds:
+    dead_flag = False
+    dead_timer = 0
+
+    def run(self, override=None, status=None):
+        match override:
+            case "dead":
+                self.dead_flag = True
+                self.dead_timer = time.time()
+                robot.sensors.putString("display", "dead")
+            case None:
+                if self.dead_flag:
+                    self.dead_flag = not (time.time() - self.dead_timer > 10)
+                else:
+                    if status is not None:
+                        ok = 0
+                        for i in status:
+                            if status[i]:
+                                ok += 1
+                        match ok:
+                            case 0 | 1: robot.sensors.putString("display", "sad1")
+                            case 2 | 3: robot.sensors.putString("display", "sad2")
+                            case 4 | 5 | 6: robot.sensors.putString("display", "neutral")
+                            case 7 | 8: robot.sensors.putString("display", "happy1")
+                            case 9 | 10: robot.sensors.putString("display", "happy2")
+            case Default:
+                robot.sensors.putString("display", override)
+
+
 curState = RobotState.stopped
 curMod = [Mods.studentModules[0], 0]
+hat = leds()
 
 
 def teleop():
@@ -56,6 +86,7 @@ while True:
         case RobotState.stopped:
             logging.debug("robot stopped")
             robot.control.putBoolean("stop", True)
+            hat.run(status=Mods.modStatus)
             Mods.reset()
             for event in pygame.event.get():
                 match event.type:
@@ -88,11 +119,13 @@ while True:
                             curState = RobotState.running
 
         case RobotState.teleop:
+            hat.run(override="running")
             logging.debug("teleop mode")
             teleop()
             if controller.getButton(controller.Button.hamburger):
                 curState = RobotState.stopped
         case RobotState.testing:
+            hat.run(override="thinking")
             logging.info("testing student code...")
             match Mods.testModule(curMod[0]):
                 case 4:
@@ -102,11 +135,14 @@ while True:
                 case _:
                     curState = RobotState.stopped
                     logging.error("Student code failed its tests!")
+                    hat.run(override="dead")
             if time.time() - Mods.testStartTime > 45:
                 logging.error("Test overran allotted time. Fail.")
                 Mods.modStatus.update({curMod[0]: False})
                 curState = RobotState.stopped
+                hat.run(override="dead")
         case RobotState.running:
+            hat.run(override="running")
             logging.debug("running student code")
             if not Mods.modStatus[curMod[0]]:  # makes sure module passed its last test
                 logging.warning("Module {} has not passed its tests and cannot be run. Abort.".format(curMod[0]))
@@ -118,6 +154,7 @@ while True:
                 case 1:
                     curState = RobotState.stopped
                     logging.error("Student code crashed!")
+                    hat.run(override="dead")
                     Mods.modStatus.update(curMod[0], False)  # make note of failure
                 case 2:
                     curState = RobotState.stopped
