@@ -3,6 +3,7 @@ from enum import Enum
 import libhousy
 import time
 import pygame
+import yaml
 from modhandler import modhandler
 import display
 from teleop import Teleop
@@ -15,7 +16,16 @@ screen = display.Display()
 controller = libhousy.controller()
 to = Teleop(robot)
 logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.INFO)
-
+intro_flag = True
+do_die_pygame = False
+with open('persist.yaml', "r") as f:
+    data = yaml.load(f, Loader=yaml.loader.SafeLoader)
+    if data["modstat"] is not None:
+        Mods.modStatus = data["modstat"]
+    if data["intro_flag"] is not None:
+        intro_flag = data["intro_flag"]
+update_timer = time.time()
+pygame_death_timer = time.time()
 
 class RobotState(Enum):
     stopped = 0
@@ -78,12 +88,25 @@ def set_mod(num):
 
 
 while True:
-    screen.run(Mods.studentModules, Mods.modStatus)
+    if intro_flag:
+        screen.intro()
+    else:
+        screen.run(Mods.studentModules, Mods.modStatus)
     if curState != RobotState.stopped:
         robot.keepAlive()
         robot.control.putBoolean("stop", False)
     match curState:
         case RobotState.stopped:
+            if do_die_pygame:
+                tm = time.time() - pygame_death_timer
+                screen.die(tm)
+                if tm > 10:
+                    do_die_pygame = False
+            if time.time() - update_timer > 120:
+                to_write = {"modstat": Mods.modStatus, "intro_flag": intro_flag}
+                with open('persist.yaml', 'w') as f:
+                    data = yaml.dump(to_write, f)
+                update_timer = time.time()
             logging.debug("robot stopped")
             robot.control.putBoolean("stop", True)
             hat.run(status=Mods.modStatus)
@@ -111,19 +134,26 @@ while True:
                     case pygame.JOYBUTTONDOWN:
                         if controller.getButton(controller.Button.A):
                             curState = RobotState.testing
-                            # TODO: switch sense hat mode
-                        if controller.getButton(controller.Button.B):
+                        if controller.getButton(controller.Button.hamburger):
                             curState = RobotState.teleop
                             to.switchback = False
                         if controller.getButton(controller.Button.Y):
                             curState = RobotState.running
 
         case RobotState.teleop:
-            hat.run(override="running")
-            logging.debug("teleop mode")
-            teleop()
-            if controller.getButton(controller.Button.hamburger):
-                curState = RobotState.stopped
+            if intro_flag:
+                hat.run(override="happy2")
+                logging.debug("teleop mode")
+                teleop()
+                if controller.getButton(controller.Button.B):
+                    curState = RobotState.stopped
+                if controller.getButton(controller.Button.lStick) and controller.getButton(controller.Button.save):
+                    curState = RobotState.stopped
+                    intro_flag = False
+                    do_die_pygame = True
+                    pygame_death_timer = time.time()
+                    hat.run(override="dead")
+
         case RobotState.testing:
             hat.run(override="thinking")
             logging.info("testing student code...")
