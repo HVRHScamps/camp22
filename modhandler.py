@@ -31,6 +31,8 @@ class modhandler:
             self.testStartTime = time.time()
             self.runningTests = 1
             self.testStage = 0
+            self.testStatus = 1
+            self.falseAutomaton = libhousy.robot(True)  # Start with a fresh copy every time
             git = subprocess.Popen(["git", "pull"], cwd="/home/robo/Documents/{}".format(modulename))
             try:
                 git.wait(5)

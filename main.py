@@ -99,14 +99,12 @@ while True:
         screen.intro()
     else:
         screen.run(Mods.studentModules, Mods.modStatus)
-    if curState != RobotState.stopped:
-        robot.keepAlive()
-        robot.control.putBoolean("stop", False)
     match curState:
         case RobotState.stopped:
             if do_die_pygame:
                 tm = time.time() - pygame_death_timer
                 screen.die(tm)
+                hat.run(override="dead")
                 if tm > 30:
                     do_die_pygame = False
                     set_mod(0)
@@ -151,6 +149,8 @@ while True:
                                 curState = RobotState.running
 
         case RobotState.teleop:
+            robot.keepAlive()
+            robot.control.putBoolean("stop", False)
             if intro_flag:
                 hat.run(override="happy2")
                 logging.debug("teleop mode")
@@ -166,7 +166,7 @@ while True:
 
         case RobotState.testing:
             hat.run(override="thinking")
-            logging.info("testing student code...")
+            robot.control.putBoolean("stop", True)
             match Mods.testModule(curMod[0]):
                 case 4:
                     curState = RobotState.stopped
@@ -174,6 +174,7 @@ while True:
                     Mods.modStatus.update({curMod[0]: True})
                 case (0 | 1):
                     curState = RobotState.testing
+                    logging.debug("Testing student code...")
                 case _:
                     curState = RobotState.stopped
                     logging.error("Student code failed its tests!")
@@ -183,7 +184,10 @@ while True:
                 Mods.modStatus.update({curMod[0]: False})
                 curState = RobotState.stopped
                 hat.run(override="dead")
+
         case RobotState.running:
+            robot.keepAlive()
+            robot.control.putBoolean("stop", False)
             hat.run(override="running")
             logging.debug("running student code")
             if not Mods.modStatus[curMod[0]]:  # makes sure module passed its last test
