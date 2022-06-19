@@ -149,6 +149,9 @@ class modhandler:
         return self.testStatus
 
     def runModule(self, modulename: string):
+        if self.testStatus == 0:
+            importlib.reload(self.subject)
+            self.testStatus = 1
         """Returns: 0 - running, 1 - internal fault 2 - done"""
         self.subject = self.mods[modulename]
         try:
