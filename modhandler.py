@@ -41,8 +41,8 @@ class modhandler:
             except subprocess.TimeoutExpired:
                 logging.warning("Git pull did not work, using last fetched version")
                 pass
-        subject = self.mods[modulename]
-        importlib.reload(subject)
+            subject = self.mods[modulename]
+            importlib.reload(subject)
         match modulename:
             case "driveForward10":
                 match self.testStage:
