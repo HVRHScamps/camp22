@@ -14,7 +14,7 @@ Mods = modhandler(
      "verbalNav", "teleop"],
     robot)
 screen = display.Display()
-controller = libhousy.controller()
+controller = robot.controller
 to = Teleop(robot)
 logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.INFO)
 intro_flag = True
@@ -152,6 +152,9 @@ while True:
                         exit()
 
         case RobotState.teleop:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    break
             robot.keepAlive()
             robot.control.putBoolean("stop", False)
             if intro_flag:
@@ -189,6 +192,9 @@ while True:
                 hat.run(override="dead")
 
         case RobotState.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    break
             robot.keepAlive()
             robot.control.putBoolean("stop", False)
             hat.run(override="running")
