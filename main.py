@@ -10,7 +10,8 @@ from teleop import Teleop
 
 robot = libhousy.robot()
 Mods = modhandler(
-    ["firstSteps", "driveForward10", "autoPickup", "manualLaunch", "autoLaunch", "gyroTurn", "holdStill", "getHome", "verbalNav", "teleop"],
+    ["firstSteps", "driveForward10", "autoPickup", "manualLaunch", "autoLaunch", "gyroTurn", "holdStill", "getHome",
+     "verbalNav", "teleop"],
     robot)
 screen = display.Display()
 controller = libhousy.controller()
@@ -26,6 +27,7 @@ with open('persist.yaml', "r") as f:
         intro_flag = data["intro_flag"]
 update_timer = time.time()
 pygame_death_timer = time.time()
+
 
 class RobotState(Enum):
     stopped = 0
@@ -54,11 +56,16 @@ class leds:
                             if status[i]:
                                 ok += 1
                         match ok:
-                            case 0 | 1: robot.sensors.putString("display", "sad1")
-                            case 2 | 3: robot.sensors.putString("display", "sad2")
-                            case 4 | 5 | 6: robot.sensors.putString("display", "neutral")
-                            case 7 | 8: robot.sensors.putString("display", "happy1")
-                            case 9 | 10: robot.sensors.putString("display", "happy2")
+                            case 0 | 1:
+                                robot.sensors.putString("display", "sad1")
+                            case 2 | 3:
+                                robot.sensors.putString("display", "sad2")
+                            case 4 | 5 | 6:
+                                robot.sensors.putString("display", "neutral")
+                            case 7 | 8:
+                                robot.sensors.putString("display", "happy1")
+                            case 9 | 10:
+                                robot.sensors.putString("display", "happy2")
             case Default:
                 robot.sensors.putString("display", override)
 
@@ -131,6 +138,7 @@ while True:
                             case default:
                                 newMod = curMod[1]
                         set_mod(newMod)
+                        logging.debug("Curmod: {}".format(curMod))
                     case pygame.JOYBUTTONDOWN:
                         if controller.getButton(controller.Button.A):
                             curState = RobotState.testing
