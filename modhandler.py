@@ -5,6 +5,7 @@ import time
 import logging
 import sys
 import subprocess
+logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.INFO)
 
 
 class modhandler:

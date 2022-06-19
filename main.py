@@ -6,7 +6,7 @@ import pygame
 import yaml
 from modhandler import modhandler
 import display
-from teleop import Teleop
+from teleop_builtin import Teleop
 
 robot = libhousy.robot()
 Mods = modhandler(
