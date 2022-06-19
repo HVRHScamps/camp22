@@ -108,6 +108,18 @@ class modhandler:
                         self.modStatus[modulename] = True
                         logging.info("passed all tests")
 
+            case "firstSteps":
+                if round(time.time() - self.testStartTime, 5) % 2 == 0:
+                    self.falseAutomaton.lDriveEncoder.value += self.falseAutomaton.lDrive.value * 192 * 2
+                    self.falseAutomaton.rDriveEncoder.value += self.falseAutomaton.rDrive.value * 192 * 2
+                if time.time() - self.testStartTime > 5:
+                    if self.falseAutomaton.lDriveEncoder.value > 10 and self.falseAutomaton.rDriveEncoder.value > 10:
+                        self.testStatus = 4
+                        self.modStatus[modulename] = True
+                    else:
+                        self.testStatus = 2
+                        self.modStatus[modulename] = False
+
             case _:
                 logging.warning("No testing profile defined for module")
                 logging.warning("running stability-only test")
