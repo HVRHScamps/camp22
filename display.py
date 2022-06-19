@@ -74,7 +74,7 @@ class Display:
                 sys.exit()
         self.DISPLAYSURF.fill(self.BLACK)
         text = pygame.font.Font('freesansbold.ttf', 64).render("Welcome to Robotics!", True, self.WHITE)
-        self.DISPLAYSURF.blit(text, (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2))
+        self.DISPLAYSURF.blit(text, (self.TEXT_MARGIN, self.SCREEN_HEIGHT/2))
         pygame.display.update()
 
     def die(self, time):
@@ -87,7 +87,7 @@ class Display:
             text = pygame.font.Font('freesansbold.ttf', 64).render("CRITICAL SYSTEM FAILURE", True, self.BLACK)
         else:
             text = pygame.font.Font('freesansbold.ttf', 64).render("CRITICAL SYSTEM FAILURE", True, self.WHITE)
-        self.DISPLAYSURF.blit(text, (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2))
+        self.DISPLAYSURF.blit(text, (self.TEXT_MARGIN, self.SCREEN_HEIGHT/2))
         pygame.display.update()
 
     def run(self, mods: list, statuses: dict):
