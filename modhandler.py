@@ -23,6 +23,7 @@ class modhandler:
         # Flag to indicate wheather testing is in progress
         self.mods = {}
         self.modStatus = {}
+        self.subject = None
         for mod in self.studentModules:
             sys.path.append("/home/robo/Documents/{}".format(mod))
             self.mods.update({mod: importlib.import_module(mod)})
@@ -41,8 +42,8 @@ class modhandler:
             except subprocess.TimeoutExpired:
                 logging.warning("Git pull did not work, using last fetched version")
                 pass
-            subject = self.mods[modulename]
-            importlib.reload(subject)
+            self.subject = self.mods[modulename]
+            importlib.reload(self.subject)
         match modulename:
             case "driveForward10":
                 match self.testStage:
