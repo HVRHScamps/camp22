@@ -113,9 +113,7 @@ class modhandler:
             case "firstSteps":
                 match self.testStage:
                     case 0:
-                        logging.debug("Firststeps test: rdrive: {}, ldrive: {}".format(self.falseAutomaton.lDrive.value,
-                                                                                       self.falseAutomaton.rDrive.value))
-                        if time.time() - self.testStartTime > 5:
+                        if time.time() - self.testStartTime > 1:
                             if self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value > 0:
                                 self.testStage += 1
                             else:
