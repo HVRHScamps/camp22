@@ -31,7 +31,7 @@ class modhandler:
             self.testStartTime = time.time()
             self.runningTests = 1
             self.testStage = 0
-        git = subprocess.Popen(["git", "pull"], cwd="/home/robo/Docuemnts/{}".format(modulename))
+        git = subprocess.Popen(["git", "pull"], cwd="/home/robo/Documents/{}".format(modulename))
         try:
             git.wait(5)
         except subprocess.TimeoutExpired:

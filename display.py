@@ -49,6 +49,7 @@ class Display:
 
     def __init__(self):
         pygame.init()
+        pygame.mouse.set_visible(False)
         self.DISPLAYSURF = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT),pygame.FULLSCREEN)
         self.DISPLAYSURF.fill(self.BACKGROUND)
         self.font = pygame.font.Font('freesansbold.ttf', 32)
@@ -85,9 +86,9 @@ class Display:
                 sys.exit()
         self.DISPLAYSURF.fill(self.RED)
         if round(time, 0) % 2 == 0:
-            text = pygame.font.Font('freesansbold.ttf', 64).render("CRITICAL SYSTEM FAILURE", True, self.BLACK)
+            text = pygame.font.Font('freesansbold.ttf', 48).render("CRITICAL SYSTEM FAILURE", True, self.BLACK)
         else:
-            text = pygame.font.Font('freesansbold.ttf', 64).render("CRITICAL SYSTEM FAILURE", True, self.WHITE)
+            text = pygame.font.Font('freesansbold.ttf', 48).render("CRITICAL SYSTEM FAILURE", True, self.WHITE)
         text_rect = text.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
         self.DISPLAYSURF.blit(text, text_rect)
         pygame.display.update()
