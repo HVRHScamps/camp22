@@ -141,7 +141,7 @@ class modhandler:
                 self.testStatus = 4
                 self.modStatus[modulename] = True  # assume true until the except below proves otherwise
         try:
-            subject.main(self.falseAutomaton)
+            self.subject.main(self.falseAutomaton)
         except Exception as err:
             logging.error("Testing student module failed due to {}".format(err))
             self.modStatus[modulename] = False
@@ -150,9 +150,9 @@ class modhandler:
 
     def runModule(self, modulename: string):
         """Returns: 0 - running, 1 - internal fault 2 - done"""
-        subject = self.mods[modulename]
+        self.subject = self.mods[modulename]
         try:
-            if subject.main(self.robot) == 2:
+            if self.subject.main(self.robot) == 2:
                 return 2
         except Exception as err:
             logging.error("Running student module failed due to {}".format(err))
