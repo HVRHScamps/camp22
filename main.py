@@ -147,6 +147,9 @@ while True:
                                 to.switchback = False
                             case controller.Button.Y.value:
                                 curState = RobotState.running
+                    case pygame.QUIT:
+                        pygame.quit()
+                        exit()
 
         case RobotState.teleop:
             robot.keepAlive()

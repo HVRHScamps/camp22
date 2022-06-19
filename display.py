@@ -69,10 +69,6 @@ class Display:
                                                             self.WIDTH, self.HEIGHT), self.BORDER))
 
     def intro(self):
-        for ev in pygame.event.get():
-            if ev.type == QUIT:
-                pygame.quit()
-                sys.exit()
         self.DISPLAYSURF.fill(self.BLACK)
         text = pygame.font.Font('freesansbold.ttf', 64).render("Welcome to Robotics!", True, self.WHITE)
         text_rect = text.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
@@ -80,10 +76,6 @@ class Display:
         pygame.display.update()
 
     def die(self, time):
-        for ev in pygame.event.get():
-            if ev.type == QUIT:
-                pygame.quit()
-                sys.exit()
         self.DISPLAYSURF.fill(self.RED)
         if round(time, 0) % 2 == 0:
             text = pygame.font.Font('freesansbold.ttf', 48).render("CRITICAL SYSTEM FAILURE", True, self.BLACK)
@@ -95,10 +87,6 @@ class Display:
 
     def run(self, mods: list, statuses: dict):
         pygame.display.update()
-        for ev in pygame.event.get():
-            if ev.type == QUIT:
-                pygame.quit()
-                sys.exit()
         self.DISPLAYSURF.fill(self.BACKGROUND)
         for task in range(0, 10):
             mod: str = mods[task]
