@@ -5,6 +5,7 @@ import time
 import logging
 import sys
 import subprocess
+
 logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.INFO)
 
 
@@ -109,16 +110,29 @@ class modhandler:
                         logging.info("passed all tests")
 
             case "firstSteps":
-                if round(time.time() - self.testStartTime, 5) % 2 == 0:
-                    self.falseAutomaton.lDriveEncoder.value += self.falseAutomaton.lDrive.value * 192 * 2
-                    self.falseAutomaton.rDriveEncoder.value += self.falseAutomaton.rDrive.value * 192 * 2
-                if time.time() - self.testStartTime > 5:
-                    if self.falseAutomaton.lDriveEncoder.value > 10 and self.falseAutomaton.rDriveEncoder.value > 10:
+                match self.testStage:
+                    case 0:
+                        logging.debug("Firststeps test: rdrive: {}, ldrive: {}".format(self.falseAutomaton.lDrive.value,
+                                                                                       self.falseAutomaton.rDrive.value))
+                        if time.time() - self.testStartTime > 5:
+                            if self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value > 0:
+                                self.testStage += 1
+                            else:
+                                self.testStatus = 2
+                                self.modStatus[modulename] = False
+                                logging.error("firstSteps Did not move after 5 seconds")
+                    case 1:
+                        if time.time() - self.testStartTime > 10:
+                            if self.falseAutomaton.lDrive.value == 0 and self.falseAutomaton.rDrive.value == 0:
+                                self.testStage += 1
+                            else:
+                                self.testStatus = 2
+                                self.modStatus[modulename] = False
+                                logging.error("firstSteps kept moving when it shouldn't have")
+                    case _:
                         self.testStatus = 4
                         self.modStatus[modulename] = True
-                    else:
-                        self.testStatus = 2
-                        self.modStatus[modulename] = False
+                        logging.info("passed all tests")
 
             case _:
                 logging.warning("No testing profile defined for module")
