@@ -167,7 +167,8 @@ while True:
             logging.info("testing student code...")
             match Mods.testModule(curMod[0]):
                 case 4:
-                    curState = RobotState.running
+                    curState = RobotState.stopped
+                    logging.info("Module {} passed all test!".format(curMod[0]))
                 case (0 | 1):
                     curState = RobotState.testing
                 case _:
@@ -188,7 +189,7 @@ while True:
                 continue
             match Mods.runModule(curMod[0]):
                 case 0:
-                    break
+                    continue
                 case 1:
                     curState = RobotState.stopped
                     logging.error("Student code crashed!")

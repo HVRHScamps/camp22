@@ -40,7 +40,7 @@ class modhandler:
         subject = self.mods[modulename]
         importlib.reload(subject)
         match modulename:
-            case "driveforward10":
+            case "driveForward10":
                 match self.testStage:
                     case 0:
                         if self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value > 0:
@@ -121,7 +121,6 @@ class modhandler:
     def runModule(self, modulename: string):
         """Returns: 0 - running, 1 - internal fault 2 - done"""
         subject = self.mods[modulename]
-        importlib.reload(subject)
         try:
             if subject.main(self.robot) == 2:
                 return 2
@@ -135,3 +134,4 @@ class modhandler:
         self.testStatus = 0
         self.testStage = 0
         self.testStartTime = 0
+        self.runningTests = 0
