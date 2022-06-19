@@ -31,12 +31,12 @@ class modhandler:
             self.testStartTime = time.time()
             self.runningTests = 1
             self.testStage = 0
-        git = subprocess.Popen(["git", "pull"], cwd="/home/robo/Documents/{}".format(modulename))
-        try:
-            git.wait(5)
-        except subprocess.TimeoutExpired:
-            logging.warning("Git pull did not work, using last fetched version")
-            pass
+            git = subprocess.Popen(["git", "pull"], cwd="/home/robo/Documents/{}".format(modulename))
+            try:
+                git.wait(5)
+            except subprocess.TimeoutExpired:
+                logging.warning("Git pull did not work, using last fetched version")
+                pass
         subject = self.mods[modulename]
         importlib.reload(subject)
         match modulename:

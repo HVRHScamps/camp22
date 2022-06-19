@@ -48,7 +48,7 @@ class leds:
                 robot.sensors.putString("display", "dead")
             case None:
                 if self.dead_flag:
-                    self.dead_flag = not (time.time() - self.dead_timer > 10)
+                    self.dead_flag = not (time.time() - self.dead_timer > 4)
                 else:
                     if status is not None:
                         ok = 0
@@ -107,7 +107,7 @@ while True:
             if do_die_pygame:
                 tm = time.time() - pygame_death_timer
                 screen.die(tm)
-                if tm > 10:
+                if tm > 30:
                     do_die_pygame = False
             if time.time() - update_timer > 120:
                 to_write = {"modstat": Mods.modStatus, "intro_flag": intro_flag}
@@ -140,13 +140,14 @@ while True:
                         set_mod(newMod)
                         logging.debug("Curmod: {}".format(curMod))
                     case pygame.JOYBUTTONDOWN:
-                        if controller.getButton(controller.Button.A):
-                            curState = RobotState.testing
-                        if controller.getButton(controller.Button.hamburger):
-                            curState = RobotState.teleop
-                            to.switchback = False
-                        if controller.getButton(controller.Button.Y):
-                            curState = RobotState.running
+                        match event.button:
+                            case controller.Button.A:
+                                curState = RobotState.testing
+                            case controller.Button.hamburger:
+                                curState = RobotState.teleop
+                                to.switchback = False
+                            case controller.Button.Y:
+                                curState = RobotState.running
 
         case RobotState.teleop:
             if intro_flag:
@@ -169,6 +170,7 @@ while True:
                 case 4:
                     curState = RobotState.stopped
                     logging.info("Module {} passed all test!".format(curMod[0]))
+                    Mods.modStatus.update({curMod[0]: True})
                 case (0 | 1):
                     curState = RobotState.testing
                 case _:
