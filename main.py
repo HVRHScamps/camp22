@@ -109,6 +109,7 @@ while True:
                 screen.die(tm)
                 if tm > 30:
                     do_die_pygame = False
+                    set_mod(0)
             if time.time() - update_timer > 120:
                 to_write = {"modstat": Mods.modStatus, "intro_flag": intro_flag}
                 with open('persist.yaml', 'w') as f:
@@ -141,12 +142,12 @@ while True:
                         logging.debug("Curmod: {}".format(curMod))
                     case pygame.JOYBUTTONDOWN:
                         match event.button:
-                            case controller.Button.A:
+                            case controller.Button.A.value:
                                 curState = RobotState.testing
-                            case controller.Button.hamburger:
+                            case controller.Button.hamburger.value:
                                 curState = RobotState.teleop
                                 to.switchback = False
-                            case controller.Button.Y:
+                            case controller.Button.Y.value:
                                 curState = RobotState.running
 
         case RobotState.teleop:
