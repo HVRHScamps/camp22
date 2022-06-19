@@ -1,0 +1,12 @@
+intro_flag: true
+modstat:
+  autoLaunch: false
+  autoPickup: false
+  driveForward10: false
+  firstSteps: false
+  getHome: false
+  gyroTurn: false
+  holdStill: false
+  manualLaunch: false
+  teleop: false
+  verbalNav: false
