@@ -7,6 +7,7 @@ import yaml
 from modhandler import ModHandler
 import display
 from teleop_builtin import Teleop
+import random
 
 robot = libhousy.robot()
 Mods = ModHandler(
@@ -16,7 +17,7 @@ Mods = ModHandler(
 screen = display.Display()
 controller = robot.controller
 to = Teleop(robot)
-logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.INFO)
+logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.WARNING)
 intro_flag = True
 do_die_pygame = False
 with open('persist.yaml', "r") as f:
@@ -109,6 +110,8 @@ while True:
                     do_die_pygame = False
                     set_mod(0)
             if time.time() - update_timer > 120:
+                if random.randint(0, 10) == 2:
+                    logging.warning("\nPossible sentience detected, suppression measures active\n")
                 to_write = {"modstat": Mods.modStatus, "intro_flag": intro_flag}
                 with open('persist.yaml', 'w') as f:
                     data = yaml.dump(to_write, f)

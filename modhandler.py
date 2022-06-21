@@ -6,7 +6,7 @@ import subprocess
 import sys
 import time
 
-logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.INFO)
+logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.WARNING)
 
 
 class ModHandler:
@@ -158,8 +158,6 @@ class ModHandler:
             case "autoPickup":
                 motors = [self.falseAutomaton.pickupMotor, self.falseAutomaton.beltZ1, self.falseAutomaton.beltZ2,
                           self.falseAutomaton.beltZ3]
-                pneumatics = [self.falseAutomaton.pickupPneumatic, self.falseAutomaton.upperTension,
-                              self.falseAutomaton.lowerTension]
                 match self.testStage:
                     case 0:
                         self.testStage += 1  # give the student code 1 loop to get its ducks in a row
@@ -174,7 +172,7 @@ class ModHandler:
                             logging.error("pickup pneumatic should have been retracted")
                         if ok:
                             self.testStage += 1
-                        elif time.time() - self.testStartTime > 1:
+                        else:
                             self.testStatus = 2
                             self.modStatus[modulename] = False
                     case 2:
@@ -186,25 +184,81 @@ class ModHandler:
                                 and self.falseAutomaton.beltZ3.value == 0 and self.falseAutomaton.upperTension.value == -1 \
                                 and self.falseAutomaton.lowerTension == 1:
                             self.testStage += 1
-                        elif time.time() - self.testStartTime > 3:
+                        else:
                             self.testStatus = 2
                             self.modStatus[modulename] = False
                             logging.error("one or more actuators was not properly set on trigger pull. Fail.")
                     case 4:
                         self.falseAutomaton.controller.axes[5] = 0
                         self.testStage += 1
+                    case _:
+                        self.testStatus = 4
+                        self.modStatus[modulename] = True
+                        logging.info("passed all tests")
 
+            case "manualLaunch":
+                motors = [self.falseAutomaton.shootWheel, self.falseAutomaton.beltZ1, self.falseAutomaton.beltZ2,
+                          self.falseAutomaton.beltZ3]
+                match self.testStage:
+                    case 0:
+                        self.testStage += 1  # give the student code 1 loop to get its ducks in a row
+                    case 1 | 3:
+                        ok = True
+                        for m in motors:
+                            if m.value != 0:
+                                ok = False
+                                logging.error("{} was on when it should have been off".format(m.name))
+                        if ok:
+                            self.testStage += 1
+                        else:
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                            if self.testStage == 3:
+                                logging.error("Tried to shoot when shoot wheel was not spun up!")
+                    case 2:
+                        self.falseAutomaton.controller.axes[4] = 1
+                        self.testStage += 1
+                    case 4:
+                        self.falseAutomaton.controller.axes[4] = 0
+                        self.falseAutomaton.controller.buttons[7] = True
+                        self.testStage += 1
+                    case 5:
+                        ok = True
+                        for m in motors[1:4]:
+                            if m.value != 0:
+                                ok = False
+                                logging.error("{} was on when it should have been off".format(m.name))
+                        if ok and self.falseAutomaton.shootWheel.value > 0.8:
+                            self.testStage += 1
+                        else:
+                            logging.error("Bad spin up!")
+                    case 6:
+                        self.falseAutomaton.controller.axes[4] = 1
+                        self.falseAutomaton.controller.buttons[7] = True
+                        self.testStage += 1
+                    case 7:
+                        if self.falseAutomaton.beltZ1.value <= -0.8 and self.falseAutomaton.beltZ2.value <= -0.8 \
+                                and self.falseAutomaton.beltZ3.value == 1 and self.falseAutomaton.upperTension.value == 1 \
+                                and self.falseAutomaton.lowerTension == -1 and self.falseAutomaton.shootWheel.value > 0.8:
+                            self.testStage += 1
+                        else:
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                            logging.error("Belt system did not respond properly during launch sequence. Fail.")
                     case _:
                         self.testStatus = 4
                         self.modStatus[modulename] = True
                         logging.info("passed all tests")
 
             case _:
+                match self.testStage:
+                    case 0:
+                        logging.info("{} cannot be fully tested, checking stability only...".format(modulename))
+                    case 25:
+                        self.testStatus = 4
+                        self.modStatus[modulename] = True  # assume true until the except below proves otherwise
                 self.testStage += 1
-                logging.info("No testing profile defined for module, running stability-only test")
-                if self.testStage == 25:
-                    self.testStatus = 4
-                    self.modStatus[modulename] = True  # assume true until the except below proves otherwise
+
         try:
             self.subject.main(self.falseAutomaton)
         except Exception as err:
