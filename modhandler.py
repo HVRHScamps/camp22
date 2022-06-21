@@ -1,22 +1,22 @@
 import importlib
 import libhousy
-import string
-import time
 import logging
-import sys
+import string
 import subprocess
+import sys
+import time
 
 logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.INFO)
 
 
-class modhandler:
+class ModHandler:
     def __init__(self, studentmods: list, robot: libhousy.robot):
         """initializes student module subsystem, takes a lits of all modules as an argument"""
         self.falseAutomaton = libhousy.robot(True)
         self.robot = robot
         self.studentModules = studentmods
         self.testStatus = 0
-        # 0- not running, 1- running, 2-failed requirements, 3-runtime error, 4-pass
+        """0- not running, 1- running, 2-failed requirements, 3-runtime error, 4-pass"""
         self.testStartTime = 0
         self.testStage = 0
         self.runningTests = 0
@@ -29,7 +29,7 @@ class modhandler:
             self.mods.update({mod: importlib.import_module(mod)})
             self.modStatus.update({mod: False})
 
-    def testModule(self, modulename: string):
+    def test_module(self, modulename: string):
         if self.testStatus == 0:
             self.testStartTime = time.time()
             self.runningTests = 1
@@ -91,20 +91,42 @@ class modhandler:
                             logging.error("moved uncommanded")
                         elif time.time() - self.testStartTime > 2:
                             self.testStage += 1
-                            self.falseAutomaton.lDriveEncoder.value = 50
+                            self.falseAutomaton.lDriveEncoder.value = 6
                     case 1:
                         if self.falseAutomaton.lDrive.value < 0 and self.falseAutomaton.rDrive.value == 0:
                             self.testStage += 1
                             self.falseAutomaton.lDriveEncoder.value = 0
-                            self.falseAutomaton.rDriveEncoder.value = 50
+                            self.falseAutomaton.rDriveEncoder.value = 6
+                        elif time.time() - self.testStartTime > 3:
+                            logging.error("holdStill did not respond correctly to stimulus. Fail!")
+                            logging.error("stimulus: ldrive encoder forward 6 in, expected behavior: ldrive reverse, "
+                                          "rdrive halt. Acual behavior: ldrive={}, rdrive={}"
+                                          .format(self.falseAutomaton.lDrive.value, self.falseAutomaton.rDrive.value))
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+
                     case 2:
                         if self.falseAutomaton.rDrive.value < 0 and self.falseAutomaton.lDrive.value == 0:
                             self.testStage += 1
-                            self.falseAutomaton.lDriveEncoder.value = -50
-                            self.falseAutomaton.rDriveEncoder.value = -50
+                            self.falseAutomaton.lDriveEncoder.value = -6
+                            self.falseAutomaton.rDriveEncoder.value = -6
+                        elif time.time() - self.testStartTime > 4:
+                            logging.error("holdStill did not respond correctly to stimulus. Fail!")
+                            logging.error("stimulus: rdrive encoder forward 6 in, expected behavior: rdrive reverse, "
+                                          "ldrive halt. Acual behavior: ldrive={}, rdrive={}"
+                                          .format(self.falseAutomaton.lDrive.value, self.falseAutomaton.rDrive.value))
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
                     case 3:
                         if self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value > 0:
                             self.testStage += 1
+                        elif time.time() - self.testStartTime > 5:
+                            logging.error("holdStill did not respond correctly to stimulus. Fail!")
+                            logging.error("stimulus: ldrive and rdrive encoders back 6 in, expected behavior: ldrive "
+                                          "reverse, rdrive reverse. Acual behavior: ldrive={}, rdrive={}"
+                                          .format(self.falseAutomaton.lDrive.value, self.falseAutomaton.rDrive.value))
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
                     case _:
                         self.testStatus = 4
                         self.modStatus[modulename] = True
@@ -121,7 +143,7 @@ class modhandler:
                                 self.modStatus[modulename] = False
                                 logging.error("firstSteps Did not move after 5 seconds")
                     case 1:
-                        if time.time() - self.testStartTime > 10:
+                        if time.time() - self.testStartTime > 5:
                             if self.falseAutomaton.lDrive.value == 0 and self.falseAutomaton.rDrive.value == 0:
                                 self.testStage += 1
                             else:
@@ -133,11 +155,56 @@ class modhandler:
                         self.modStatus[modulename] = True
                         logging.info("passed all tests")
 
+            case "autoPickup":
+                motors = [self.falseAutomaton.pickupMotor, self.falseAutomaton.beltZ1, self.falseAutomaton.beltZ2,
+                          self.falseAutomaton.beltZ3]
+                pneumatics = [self.falseAutomaton.pickupPneumatic, self.falseAutomaton.upperTension,
+                              self.falseAutomaton.lowerTension]
+                match self.testStage:
+                    case 0:
+                        self.testStage += 1  # give the student code 1 loop to get its ducks in a row
+                    case 1 | 5:
+                        ok = True
+                        for m in motors:
+                            if m.value != 0:
+                                ok = False
+                                logging.error("{} was on when it should have been off".format(m.name))
+                        if self.falseAutomaton.pickupPneumatic.value != -1:
+                            ok = False
+                            logging.error("pickup pneumatic should have been retracted")
+                        if ok:
+                            self.testStage += 1
+                        elif time.time() - self.testStartTime > 1:
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                    case 2:
+                        self.falseAutomaton.controller.axes[5] = 1
+                        self.testStage += 1
+                    case 3:
+                        if self.falseAutomaton.pickupMotor.value == 1 and self.falseAutomaton.pickupPneumatic.value == 1 \
+                                and self.falseAutomaton.beltZ1.value <= -0.8 and self.falseAutomaton.beltZ2.value == 0 \
+                                and self.falseAutomaton.beltZ3.value == 0 and self.falseAutomaton.upperTension.value == -1 \
+                                and self.falseAutomaton.lowerTension == 1:
+                            self.testStage += 1
+                        elif time.time() - self.testStartTime > 3:
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                            logging.error("one or more actuators was not properly set on trigger pull. Fail.")
+                    case 4:
+                        self.falseAutomaton.controller.axes[5] = 0
+                        self.testStage += 1
+
+                    case _:
+                        self.testStatus = 4
+                        self.modStatus[modulename] = True
+                        logging.info("passed all tests")
+
             case _:
-                logging.warning("No testing profile defined for module")
-                logging.warning("running stability-only test")
-                self.testStatus = 4
-                self.modStatus[modulename] = True  # assume true until the except below proves otherwise
+                self.testStage += 1
+                logging.info("No testing profile defined for module, running stability-only test")
+                if self.testStage == 25:
+                    self.testStatus = 4
+                    self.modStatus[modulename] = True  # assume true until the except below proves otherwise
         try:
             self.subject.main(self.falseAutomaton)
         except Exception as err:
@@ -146,7 +213,7 @@ class modhandler:
             return 3
         return self.testStatus
 
-    def runModule(self, modulename: string):
+    def run_module(self, modulename: string):
         if self.testStatus == 0:
             importlib.reload(self.subject)
             self.testStatus = 1

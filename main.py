@@ -4,12 +4,12 @@ import libhousy
 import time
 import pygame
 import yaml
-from modhandler import modhandler
+from modhandler import ModHandler
 import display
 from teleop_builtin import Teleop
 
 robot = libhousy.robot()
-Mods = modhandler(
+Mods = ModHandler(
     ["firstSteps", "driveForward10", "autoPickup", "manualLaunch", "autoLaunch", "gyroTurn", "holdStill", "getHome",
      "verbalNav", "teleop"],
     robot)
@@ -36,7 +36,7 @@ class RobotState(Enum):
     running = 3
 
 
-class leds:
+class Leds:
     dead_flag = False
     dead_timer = 0
 
@@ -66,13 +66,13 @@ class leds:
                                 robot.sensors.putString("display", "happy1")
                             case 9 | 10:
                                 robot.sensors.putString("display", "happy2")
-            case Default:
+            case _:
                 robot.sensors.putString("display", override)
 
 
 curState = RobotState.stopped
 curMod = [Mods.studentModules[0], 0]
-hat = leds()
+hat = Leds()
 
 
 def teleop():
@@ -134,7 +134,7 @@ while True:
                                 newMod = curMod[1] - 1
                                 if newMod < 0:
                                     newMod = 9
-                            case default:
+                            case _:
                                 newMod = curMod[1]
                         set_mod(newMod)
                         logging.debug("Curmod: {}".format(curMod))
@@ -173,7 +173,7 @@ while True:
         case RobotState.testing:
             hat.run(override="thinking")
             robot.control.putBoolean("stop", True)
-            match Mods.testModule(curMod[0]):
+            match Mods.test_module(curMod[0]):
                 case 4:
                     curState = RobotState.stopped
                     logging.info("Module {} passed all test!".format(curMod[0]))
@@ -203,7 +203,7 @@ while True:
                 logging.warning("Module {} has not passed its tests and cannot be run. Abort.".format(curMod[0]))
                 curState = RobotState.stopped
                 continue
-            match Mods.runModule(curMod[0]):
+            match Mods.run_module(curMod[0]):
                 case 0:
                     continue
                 case 1:
