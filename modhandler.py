@@ -54,12 +54,14 @@ class ModHandler:
                             logging.error("Did not try to drive forward after 2s. fail.")
                             self.testStatus = 2
                     case 1:
-                        if round(time.time() - self.testStartTime, 5) % 2 == 0:
-                            # 16ft/s * 12in/ft * 2s/tick * throttle input
+                        tmp = (round(time.time() - self.testStartTime, 5) - round(time.time() - self.testStartTime, 0))
+                        if tmp == 0 or tmp == 0.5:
+                            # 16ft/s * 12in/ft * 0.5s/tick * throttle input
+                            # 16ft/s * 12in/ft * 0.5s/tick * throttle input
                             # This won't be super accurate bc the drivetrain isn't exactly 16ft/s and speed does not
                             # scale linearly with throttle input but whatever
-                            self.falseAutomaton.lDriveEncoder.value += self.falseAutomaton.lDrive.value * 192 * 2
-                            self.falseAutomaton.rDriveEncoder.value += self.falseAutomaton.rDrive.value * 192 * 2
+                            self.falseAutomaton.lDriveEncoder.value += self.falseAutomaton.lDrive.value * 192 * .5
+                            self.falseAutomaton.rDriveEncoder.value += self.falseAutomaton.rDrive.value * 192 * .5
                         if abs(self.falseAutomaton.lDriveEncoder.value - self.falseAutomaton.rDriveEncoder.value) > 4:
                             logging.error("turned when it shouldn't")
                             self.testStatus = 2
@@ -245,6 +247,70 @@ class ModHandler:
                             self.testStatus = 2
                             self.modStatus[modulename] = False
                             logging.error("Belt system did not respond properly during launch sequence. Fail.")
+                    case _:
+                        self.testStatus = 4
+                        self.modStatus[modulename] = True
+                        logging.info("passed all tests")
+
+            case "autoLaunch":
+                motors = [self.falseAutomaton.beltZ1, self.falseAutomaton.beltZ2,
+                          self.falseAutomaton.beltZ3]
+                match self.testStage:
+                    case 0:
+                        self.testStage += 1  # give the student code 1 loop to get its ducks in a row
+                    case 1:
+                        ok = True
+                        for m in motors:
+                            if m.value != 0:
+                                ok = False
+                                logging.error("{} was on when it should have been off".format(m.name))
+                        if ok:
+                            self.testStage += 1
+                        else:
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                            if self.testStage == 3:
+                                logging.error("Tried to shoot when shoot wheel was not spun up!")
+                    case 2:
+                        if self.falseAutomaton.shootWheel.value != 0:
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                            logging.error("Shoot wheel uncommanded spin up")
+                        self.falseAutomaton.controller.axes[4] = 1
+                        self.testStage += 1
+                    case 3 | 4 | 5 | 6 | 7:
+                        ok = True
+                        tmp = (round(time.time() - self.testStartTime, 5) - round(time.time() - self.testStartTime, 0))
+                        if self.falseAutomaton.shootWheel.value == 0:
+                            ok = False
+                            logging.error("Shoot wheel did not turn on when it should.")
+                        if self.falseAutomaton.beltZ1.value != 0 or self.falseAutomaton.beltZ2.value != 0 or \
+                                self.falseAutomaton.beltZ3.value != 0:
+                            ok = False
+                            logging.error("Belts moved when they shouldn't")
+                        if not ok:
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                        elif tmp == 0 or tmp == 0.5:
+                            self.testStage += 1
+                            self.falseAutomaton.shootEncoder.value += 50 * self.testStage  # TODO: get more accurate numbers
+                    case 8:
+                        ok = True
+                        tmp = (round(time.time() - self.testStartTime, 5) - round(time.time() - self.testStartTime, 0))
+                        if tmp == 0 or tmp == 0.5:
+                            self.testStage += 1
+                            self.falseAutomaton.shootEncoder.value += 50 * self.testStage  # TODO: get more accurate numbers
+                        for m in motors:
+                            if m.value == 0:
+                                ok = False
+                                logging.error("{} was on when it should have been off".format(m.name))
+                        if self.falseAutomaton.shootWheel.value == 0:
+                            ok = False
+                        if not ok:
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                        else:
+                            self.testStage += 1
                     case _:
                         self.testStatus = 4
                         self.modStatus[modulename] = True
