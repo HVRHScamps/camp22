@@ -1,6 +1,4 @@
 import pygame
-import sys
-from pygame.locals import *
 
 
 class Display:
@@ -50,7 +48,7 @@ class Display:
     def __init__(self):
         pygame.init()
         pygame.mouse.set_visible(False)
-        self.DISPLAYSURF = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT),pygame.FULLSCREEN)
+        self.DISPLAYSURF = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pygame.FULLSCREEN)
         self.DISPLAYSURF.fill(self.BACKGROUND)
         self.font = pygame.font.Font('freesansbold.ttf', 32)
         pygame.display.set_caption("Tasks")
@@ -62,7 +60,7 @@ class Display:
         # Create black borders
         self.borders = []
         for side in [self.DIST_FROM_LEFT, self.DIST_FROM_RIGHT]:
-            self.borders.append(self.Box(self.DISPLAYSURF, self.BLACK, (side, self.TOP_MARGIN, self.WIDTH, self.HEIGHT),self.BORDER))
+            self.borders.append(self.Box(self.DISPLAYSURF, self.BLACK, (side, self.TOP_MARGIN, self.WIDTH, self.HEIGHT), self.BORDER))
             for i in range(1, 5):
                 self.borders.append(
                     self.Box(self.DISPLAYSURF, self.BLACK, (side, (i * self.VERTICAL_SPACING + self.TOP_MARGIN),
@@ -71,6 +69,13 @@ class Display:
     def intro(self):
         self.DISPLAYSURF.fill(self.BLACK)
         text = pygame.font.Font('freesansbold.ttf', 64).render("Welcome to Robotics!", True, self.WHITE)
+        text_rect = text.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
+        self.DISPLAYSURF.blit(text, text_rect)
+        pygame.display.update()
+
+    def debug(self):
+        self.DISPLAYSURF.fill(self.GREEN)
+        text = pygame.font.Font('freesansbold.ttf', 64).render("DEBUG", True, self.BLACK)
         text_rect = text.get_rect(center=(self.SCREEN_WIDTH / 2, self.SCREEN_HEIGHT / 2))
         self.DISPLAYSURF.blit(text, text_rect)
         pygame.display.update()

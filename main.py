@@ -35,6 +35,7 @@ class RobotState(Enum):
     teleop = 1
     testing = 2
     running = 3
+    debug = 4
 
 
 class Leds:
@@ -61,9 +62,9 @@ class Leds:
                                 robot.sensors.putString("display", "sad1")
                             case 2 | 3:
                                 robot.sensors.putString("display", "sad2")
-                            case 4 | 5 | 6:
+                            case 4 | 5:
                                 robot.sensors.putString("display", "neutral")
-                            case 7 | 8:
+                            case 6 | 7 | 8:
                                 robot.sensors.putString("display", "happy1")
                             case 9 | 10:
                                 robot.sensors.putString("display", "happy2")
@@ -98,6 +99,8 @@ def set_mod(num):
 while True:
     if intro_flag:
         screen.intro()
+    elif curState == RobotState.debug:
+        screen.debug()
     else:
         screen.run(Mods.studentModules, Mods.modStatus)
     match curState:
@@ -110,7 +113,7 @@ while True:
                     do_die_pygame = False
                     set_mod(0)
             if time.time() - update_timer > 120:
-                if random.randint(0, 10) == 2:
+                if random.randint(0, 40) == 2:
                     logging.warning("\nPossible sentience detected, suppression measures active\n")
                 to_write = {"modstat": Mods.modStatus, "intro_flag": intro_flag}
                 with open('persist.yaml', 'w') as f:
@@ -150,6 +153,8 @@ while True:
                                 to.switchback = False
                             case controller.Button.Y.value:
                                 curState = RobotState.running
+                            case controller.Button.X.value:
+                                curState = RobotState.debug
                     case pygame.QUIT:
                         pygame.quit()
                         exit()
@@ -195,9 +200,6 @@ while True:
                 hat.run(override="dead")
 
         case RobotState.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    break
             robot.keepAlive()
             robot.control.putBoolean("stop", False)
             hat.run(override="running")
@@ -218,6 +220,24 @@ while True:
                     curState = RobotState.stopped
                     logging.info("Student code exited gracefully")
             for event in pygame.event.get():
-                if event.type == pygame.CONTROLLERBUTTONDOWN:
+                if event.type == pygame.QUIT:
+                    break
+                elif event.type == pygame.CONTROLLERBUTTONDOWN or event.type == pygame.KEYDOWN:
                     curState = RobotState.stopped
-                    print("stop requested by xbox controller")
+                    logging.warning("stop requested")
+
+        case RobotState.debug:
+            # designed to update keepalive while students execute code in separate python console
+            robot.keepAlive()
+            robot.control.putBoolean("stop", False)
+            hat.run(override="running")
+            logging.debug("In debug mode")
+            # Try to not let the robot drive
+            robot.lDrive.Set(0)
+            robot.rDrive.Set(0)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    break
+                elif event.type == pygame.CONTROLLERBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    curState = RobotState.stopped
+                    logging.warning("stop requested")
