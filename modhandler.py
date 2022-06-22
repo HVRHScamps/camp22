@@ -199,6 +199,44 @@ class ModHandler:
                         self.modStatus[modulename] = True
                         logging.info("passed all tests")
 
+            case "gyroTurn":
+                match self.testStage:
+                    case 0:
+                        self.testStage += 1  # give the student code 1 loop to get its ducks in a row
+                    case 1: #did it turn in correct direction
+                            #left reverse && right forward to turn left OR left still && right forward(i think?)
+                        if ((self.falseAutomaton.lDrive.value < 0 and self.falseAutomaton.rDrive.value > 0) 
+                            or (self.falseAutomaton.lDrive.value == 0 and self.falseAutomaton.rDrive.value > 0)): 
+                            self.testStage += 1
+                        elif ((self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value < 0) 
+                            or (self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value == 0)): #turned right
+                            logging.error("Tried to turn right instead of left")
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                        elif (((self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value > 0) 
+                            or (self.falseAutomaton.lDrive.value < 0 and self.falseAutomaton.rDrive.value < 0))): #drove forward or reverse instead
+                            logging.error("Tried to drive instead of turn")
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                        elif time.time() - self.testStartTime > 2:
+                            logging.error("Did not try to turn after 2s. fail.")
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                    case 2: #did it turn the correct amount
+                        if self.falseAutomaton.sense_hat.getYaw() == -90: #might need range of accepted values instead of strictly -90??
+                            self.testStage += 1
+                        elif self.falseAutomaton.sense_hat.getYaw() < -90:
+                            logging.error("Turned too far")
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                        elif self.falseAutomaton.sense_hat.getYaw() > -90:
+                            logging.error("Didn't turn far enough")
+                            self.testStatus = 2
+                            self.modStatus[modulename] = False
+                    case _:   
+                        self.testStatus = 4
+                        self.modStatus[modulename] = True
+                        logging.info("passed all tests") 
             case _:
                 self.testStage += 1
                 logging.info("No testing profile defined for module, running stability-only test")
