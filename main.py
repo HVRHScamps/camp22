@@ -200,6 +200,13 @@ while True:
                 hat.run(override="dead")
 
         case RobotState.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    break
+                elif event.type == pygame.JOYBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    curState = RobotState.stopped
+                    logging.warning("stop requested")
+                    continue
             robot.keepAlive()
             robot.control.putBoolean("stop", False)
             hat.run(override="running")
@@ -219,12 +226,6 @@ while True:
                 case 2:
                     curState = RobotState.stopped
                     logging.info("Student code exited gracefully")
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    break
-                elif event.type == pygame.JOYBUTTONDOWN or event.type == pygame.KEYDOWN:
-                    curState = RobotState.stopped
-                    logging.warning("stop requested")
 
         case RobotState.debug:
             # designed to update keepalive while students execute code in separate python console
