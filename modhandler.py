@@ -358,10 +358,10 @@ class ModHandler:
 
     def run_module(self, modulename: string):
         if self.testStatus == 0:
+            self.subject = self.mods[modulename]
             importlib.reload(self.subject)
             self.testStatus = 1
         """Returns: 0 - running, 1 - internal fault 2 - done"""
-        self.subject = self.mods[modulename]
         try:
             if self.subject.main(self.robot) == 2:
                 return 2
