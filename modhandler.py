@@ -255,6 +255,7 @@ class ModHandler:
             case "autoLaunch":
                 motors = [self.falseAutomaton.beltZ1, self.falseAutomaton.beltZ2,
                           self.falseAutomaton.beltZ3]
+                tmp = (round(time.time() - self.testStartTime, 5) - round(time.time() - self.testStartTime, 0))
                 match self.testStage:
                     case 0:
                         self.testStage += 1  # give the student code 1 loop to get its ducks in a row
@@ -280,7 +281,6 @@ class ModHandler:
                         self.testStage += 1
                     case 3 | 4 | 5 | 6 | 7:
                         ok = True
-                        tmp = (round(time.time() - self.testStartTime, 5) - round(time.time() - self.testStartTime, 0))
                         if self.falseAutomaton.shootWheel.value == 0:
                             ok = False
                             logging.error("Shoot wheel did not turn on when it should.")
@@ -296,16 +296,14 @@ class ModHandler:
                             self.falseAutomaton.shootEncoder.value += 50 * self.testStage  # TODO: get more accurate numbers
                     case 8:
                         ok = True
-                        tmp = (round(time.time() - self.testStartTime, 5) - round(time.time() - self.testStartTime, 0))
                         if tmp == 0 or tmp == 0.5:
                             self.testStage += 1
                             self.falseAutomaton.shootEncoder.value += 50 * self.testStage  # TODO: get more accurate numbers
-                        for m in motors:
-                            if m.value == 0:
-                                ok = False
-                                logging.error("{} was on when it should have been off".format(m.name))
-                        if self.falseAutomaton.shootWheel.value == 0:
+                        if self.falseAutomaton.beltZ1.value > -0.8 or self.falseAutomaton.beltZ2.value > -0.8 \
+                                or self.falseAutomaton.beltZ3.value != 1 or self.falseAutomaton.upperTension.value != 1 \
+                                or self.falseAutomaton.lowerTension != -1 or self.falseAutomaton.shootWheel.value < 0.8:
                             ok = False
+                            logging.error("Belt system did not respond correctly to spin up.")
                         if not ok:
                             self.testStatus = 2
                             self.modStatus[modulename] = False
