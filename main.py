@@ -203,7 +203,7 @@ while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     break
-                elif event.type == pygame.JOYBUTTONDOWN or event.type == pygame.KEYDOWN:
+                elif event.type == pygame.JOYBUTTONDOWN and event.button == controller.Button.B.value:
                     curState = RobotState.stopped
                     logging.warning("stop requested")
                     continue
