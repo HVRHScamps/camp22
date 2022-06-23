@@ -222,7 +222,6 @@ while True:
                     curState = RobotState.stopped
                     logging.error("Student code crashed!")
                     hat.run(override="dead")
-                    Mods.modStatus.update({curMod[0], False})  # make note of failure
                 case 2:
                     curState = RobotState.stopped
                     logging.info("Student code exited gracefully")

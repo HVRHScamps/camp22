@@ -293,12 +293,12 @@ class ModHandler:
                             self.modStatus[modulename] = False
                         elif tmp == 0 or tmp == 0.5:
                             self.testStage += 1
-                            self.falseAutomaton.shootEncoder.value += 50 * self.testStage  # TODO: get more accurate numbers
+                            self.falseAutomaton.shootEncoder.value += 90 * self.testStage
                     case 8:
                         ok = True
                         if tmp == 0 or tmp == 0.5:
                             self.testStage += 1
-                            self.falseAutomaton.shootEncoder.value += 50 * self.testStage  # TODO: get more accurate numbers
+                            self.falseAutomaton.shootEncoder.value += 65 * self.testStage
                         if self.falseAutomaton.beltZ1.value > -0.8 or self.falseAutomaton.beltZ2.value > -0.8 \
                                 or self.falseAutomaton.beltZ3.value != 1 or self.falseAutomaton.upperTension.value != 1 \
                                 or self.falseAutomaton.lowerTension != -1 or self.falseAutomaton.shootWheel.value < 0.8:
