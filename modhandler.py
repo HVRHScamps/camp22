@@ -62,6 +62,8 @@ class ModHandler:
                             # scale linearly with throttle input but whatever
                             self.falseAutomaton.lDriveEncoder.value += self.falseAutomaton.lDrive.value * 192 * .5
                             self.falseAutomaton.rDriveEncoder.value += self.falseAutomaton.rDrive.value * 192 * .5
+                            logging.info("lDriveEncoder: {}".format(self.falseAutomaton.lDriveEncoder.Get()))
+                            logging.info("rDriveEncoder: {}".format(self.falseAutomaton.rDriveEncoder.Get()))
                         if abs(self.falseAutomaton.lDriveEncoder.value - self.falseAutomaton.rDriveEncoder.value) > 4:
                             logging.error("turned when it shouldn't")
                             self.testStatus = 2
