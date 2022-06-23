@@ -315,7 +315,7 @@ class ModHandler:
                         logging.info("passed all tests")
 
             case "gyroTurn":
-                turnrate = (self.falseAutomaton.lDrive.value() - self.falseAutomaton.rDrive.value()) / 2
+                turnrate = (self.falseAutomaton.lDrive.value - self.falseAutomaton.rDrive.value) / 2
                 self.falseAutomaton.sense_hat.yaw += turnrate * 5
                 if self.falseAutomaton.sense_hat.get_yaw() < -92:
                     logging.warning("gyroTurn overshoot. Angle={}".format(self.falseAutomaton.sense_hat.get_yaw()))
