@@ -49,7 +49,7 @@ class ModHandler:
                 match self.testStage:
                     case 0:
                         if self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value > 0:
-                            self.testStage += 1
+                            self.testStage += 2
                         elif time.time() - self.testStartTime > 2:
                             logging.error("Did not try to drive forward after 2s. fail.")
                             self.testStatus = 2
