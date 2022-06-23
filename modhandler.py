@@ -243,7 +243,7 @@ class ModHandler:
                     case 7:
                         if self.falseAutomaton.beltZ1.value <= -0.8 and self.falseAutomaton.beltZ2.value <= -0.8 \
                                 and self.falseAutomaton.beltZ3.value == 1 and self.falseAutomaton.upperTension.value == 1 \
-                                and self.falseAutomaton.lowerTension == -1 and self.falseAutomaton.shootWheel.value > 0.8:
+                                and self.falseAutomaton.lowerTension.value == -1 and self.falseAutomaton.shootWheel.value > 0.8:
                             self.testStage += 1
                         else:
                             self.testStatus = 2
