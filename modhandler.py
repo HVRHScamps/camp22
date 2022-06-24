@@ -363,10 +363,10 @@ class ModHandler:
             self.subject = self.mods[modulename]
             importlib.reload(self.subject)
             self.testStatus = 1
-            self.robot.lDriveEncoder.Reset()
+            self.robot.control.putNumber("encRst", 5)  # reset navx
             while self.robot.control.getNumber("encRst", 1) != 0:
                 time.sleep(0.05)  # wait for robo rio ack
-            self.robot.rDriveEncoder.Reset()
+            self.robot.control.putNumber("encRst", 6)  # reset both drivetrain encoders
             while self.robot.control.getNumber("encRst", 1) != 0:
                 time.sleep(0.05)  # wait for robo rio ack
         """Returns: 0 - running, 1 - internal fault 2 - done"""
