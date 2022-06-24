@@ -295,7 +295,7 @@ class ModHandler:
                             self.modStatus[modulename] = False
                         elif tmp == 0 or tmp == 0.5:
                             self.testStage += 1
-                            self.falseAutomaton.shootEncoder.value += 90 * self.testStage
+                            self.falseAutomaton.shootEncoder.value += 125 * self.testStage
                     case 8:
                         ok = True
                         if tmp == 0 or tmp == 0.5:
@@ -341,6 +341,10 @@ class ModHandler:
                     logging.error("Did not turn in time. Final angle: {} lDrive: {} rDrive: {}"
                                   .format(self.falseAutomaton.sense_hat.get_yaw(), self.falseAutomaton.lDrive.value(),
                                           self.falseAutomaton.rDrive.value()))
+            case "verbalNav":
+                self.testStatus = 4
+                self.modStatus[modulename] = True  # assume true until the except below proves otherwise
+                return self.testStatus
             case _:
                 match self.testStage:
                     case 0:
