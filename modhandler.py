@@ -363,6 +363,10 @@ class ModHandler:
             self.subject = self.mods[modulename]
             importlib.reload(self.subject)
             self.testStatus = 1
+            self.robot.lDriveEncoder.Reset()
+            time.sleep(0.05)  # give roboRio some time to process first reset request
+            self.robot.rDriveEncoder.Reset()
+            time.sleep(0.05)
         """Returns: 0 - running, 1 - internal fault 2 - done"""
         try:
             if self.subject.main(self.robot) == 2:
