@@ -15,15 +15,14 @@ class ModHandler:
         self.falseAutomaton = libhousy.robot(True)
         self.robot = robot
         self.studentModules = studentmods
-        self.testStatus = 0
-        """0- not running, 1- running, 2-failed requirements, 3-runtime error, 4-pass"""
+        self.testStatus = 0  # 0- not running, 1- running, 2-failed requirements, 3-runtime error, 4-pass
         self.testStartTime = 0
         self.testStage = 0
-        self.runningTests = 0
-        # Flag to indicate wheather testing is in progress
-        self.mods = {}
-        self.modStatus = {}
-        self.subject = None
+        self.testSpecific = 0  # a variable that any test can use for whatever, usually timings
+        self.runningTests = 0  # Flag to indicate wheather testing is in progress
+        self.mods = {}  # dict of mod names and actual module objects
+        self.modStatus = {}  # dict of name of each mod and wheather it passes the vibe check
+        self.subject = None  # Module currently selected to be tested or run
         for mod in self.studentModules:
             sys.path.append("/home/robo/Documents/{}".format(mod))
             self.mods.update({mod: importlib.import_module(mod)})
@@ -48,20 +47,21 @@ class ModHandler:
             case "driveForward10":
                 match self.testStage:
                     case 0:
+                        self.testSpecific = time.time()
                         if self.falseAutomaton.lDrive.value > 0 and self.falseAutomaton.rDrive.value > 0:
                             self.testStage += 2
                         elif time.time() - self.testStartTime > 2:
                             logging.error("Did not try to drive forward after 2s. fail.")
                             self.testStatus = 2
                     case 1:
-                        tmp = (round(time.time() - self.testStartTime, 5) - round(time.time() - self.testStartTime, 0))
-                        if tmp == 0 or tmp == 0.5:
+                        if time.time() - self.testSpecific > 0.25:
+                            self.testSpecific = time.time()
                             # 16ft/s * 12in/ft * 0.5s/tick * throttle input
                             # 16ft/s * 12in/ft * 0.5s/tick * throttle input
                             # This won't be super accurate bc the drivetrain isn't exactly 16ft/s and speed does not
                             # scale linearly with throttle input but whatever
-                            self.falseAutomaton.lDriveEncoder.value += self.falseAutomaton.lDrive.value * 192 * .5
-                            self.falseAutomaton.rDriveEncoder.value += self.falseAutomaton.rDrive.value * 192 * .5
+                            self.falseAutomaton.lDriveEncoder.value += self.falseAutomaton.lDrive.value * 192 * .25
+                            self.falseAutomaton.rDriveEncoder.value += self.falseAutomaton.rDrive.value * 192 * .25
                             logging.info("lDriveEncoder: {}".format(self.falseAutomaton.lDriveEncoder.Get()))
                             logging.info("rDriveEncoder: {}".format(self.falseAutomaton.rDriveEncoder.Get()))
                         if abs(self.falseAutomaton.lDriveEncoder.value - self.falseAutomaton.rDriveEncoder.value) > 4:
@@ -257,7 +257,6 @@ class ModHandler:
             case "autoLaunch":
                 motors = [self.falseAutomaton.beltZ1, self.falseAutomaton.beltZ2,
                           self.falseAutomaton.beltZ3]
-                tmp = (round(time.time() - self.testStartTime, 5) - round(time.time() - self.testStartTime, 0))
                 match self.testStage:
                     case 0:
                         self.testStage += 1  # give the student code 1 loop to get its ducks in a row
@@ -281,6 +280,7 @@ class ModHandler:
                             logging.error("Shoot wheel uncommanded spin up")
                         self.falseAutomaton.controller.axes[4] = 1
                         self.testStage += 1
+                        self.testSpecific = time.time()
                     case 3 | 4 | 5 | 6 | 7:
                         ok = True
                         if self.falseAutomaton.shootWheel.value == 0:
@@ -293,22 +293,23 @@ class ModHandler:
                         if not ok:
                             self.testStatus = 2
                             self.modStatus[modulename] = False
-                        elif tmp == 0 or tmp == 0.5:
+                        elif time.time() - self.testSpecific > 0.25:
+                            self.testSpecific = time.time()
                             self.testStage += 1
-                            self.falseAutomaton.shootEncoder.value += 125 * self.testStage
-                    case 8:
+                            self.falseAutomaton.shootEncoder.value += 72 * self.testStage
+                    case 8 | 9 | 10 | 11:
                         ok = True
-                        if tmp == 0 or tmp == 0.5:
-                            self.testStage += 1
-                            self.falseAutomaton.shootEncoder.value += 65 * self.testStage
+                        if time.time() - self.testSpecific > 0.25:
+                            self.testSpecific = time.time()
+                            self.falseAutomaton.shootEncoder.value += 63 * self.testStage
                         if self.falseAutomaton.beltZ1.value > -0.8 or self.falseAutomaton.beltZ2.value > -0.8 \
                                 or self.falseAutomaton.beltZ3.value != 1 or self.falseAutomaton.upperTension.value != 1 \
                                 or self.falseAutomaton.lowerTension != -1 or self.falseAutomaton.shootWheel.value < 0.8:
                             ok = False
-                            logging.error("Belt system did not respond correctly to spin up.")
-                        if not ok:
+                        if not ok and self.testStage == 11:
                             self.testStatus = 2
                             self.modStatus[modulename] = False
+                            logging.error("Belt system did not respond correctly to spin up.")
                         else:
                             self.testStage += 1
                     case _:
@@ -388,3 +389,4 @@ class ModHandler:
         self.testStage = 0
         self.testStartTime = 0
         self.runningTests = 0
+        self.testSpecific = 0

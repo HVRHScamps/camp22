@@ -7,27 +7,36 @@ import yaml
 from modhandler import ModHandler
 import display
 from teleop_builtin import Teleop
+from leds import Leds
 import random
 
+# Define objects
 robot = libhousy.robot()
 Mods = ModHandler(
     ["firstSteps", "driveForward10", "autoPickup", "manualLaunch", "autoLaunch", "gyroTurn", "holdStill", "getHome",
-     "verbalNav", "teleop"],
-    robot)
+     "verbalNav", "teleop"], robot)  # give ModHandler a list of modules to handle (must be exactly 10!)
 screen = display.Display()
 controller = robot.controller
 to = Teleop(robot)
+hat = Leds()
+
+# initialize logging system
 logging.basicConfig(filename="/var/log/robotmain.log", encoding="utf-8", level=logging.WARNING)
-intro_flag = True
-do_die_pygame = False
+
+# define misc variables
+intro_flag = True  # Tells robot to allow teleop_builtin and arms the intro sequence
+do_die_pygame = False  # overrides normal display system during intro sequence
+curMod = [Mods.studentModules[0], 0]  # includes name and number bc its easier
+update_timer = time.time()
+pygame_death_timer = time.time()
+
+# Load autosave data of last robot state
 with open('persist.yaml', "r") as f:
     data = yaml.load(f, Loader=yaml.loader.SafeLoader)
     if data["modstat"] is not None:
         Mods.modStatus = data["modstat"]
     if data["intro_flag"] is not None:
         intro_flag = data["intro_flag"]
-update_timer = time.time()
-pygame_death_timer = time.time()
 
 
 class RobotState(Enum):
@@ -38,59 +47,10 @@ class RobotState(Enum):
     debug = 4
 
 
-class Leds:
-    dead_flag = False
-    dead_timer = 0
-
-    def run(self, override=None, status=None):
-        match override:
-            case "dead":
-                self.dead_flag = True
-                self.dead_timer = time.time()
-                robot.sensors.putString("display", "dead")
-            case None:
-                if self.dead_flag:
-                    self.dead_flag = not (time.time() - self.dead_timer > 4)
-                else:
-                    if status is not None:
-                        ok = 0
-                        for i in status:
-                            if status[i]:
-                                ok += 1
-                        match ok:
-                            case 0 | 1:
-                                robot.sensors.putString("display", "sad1")
-                            case 2 | 3:
-                                robot.sensors.putString("display", "sad2")
-                            case 4 | 5:
-                                robot.sensors.putString("display", "neutral")
-                            case 6 | 7 | 8:
-                                robot.sensors.putString("display", "happy1")
-                            case 9 | 10:
-                                robot.sensors.putString("display", "happy2")
-            case _:
-                robot.sensors.putString("display", override)
-
-
 curState = RobotState.stopped
-curMod = [Mods.studentModules[0], 0]
-hat = Leds()
 
 
-def teleop():
-    to.drive(controller.getAxis(controller.Axis.rStickX), controller.getAxis(controller.Axis.rStickY))
-    robot.shootWheel.Set(int(controller.getButton(controller.Button.rBumper)))
-    if controller.getAxis(controller.Axis.lTrigger) > 0.8:
-        to.pickup()
-    elif controller.getAxis(controller.Axis.rTrigger) > 0.8 and controller.getButton(controller.Button.rBumper):
-        to.shoot()
-    else:
-        to.stop()
-    to.anglehood(controller.getAxis(controller.Axis.lStickY))
-    time.sleep(0.01)
-
-
-def set_mod(num):
+def set_mod(num):  # sets currently selected module
     global curMod
     curMod = [Mods.studentModules[num], num]
     screen.select_box(num)
@@ -112,7 +72,7 @@ while True:
                 if tm > 30:
                     do_die_pygame = False
                     set_mod(0)
-            if time.time() - update_timer > 120:
+            if time.time() - update_timer > 120:  # Every 2 minutes save robot state
                 if random.randint(0, 40) == 2:
                     logging.warning("\nPossible sentience detected, suppression measures active\n")
                 to_write = {"modstat": Mods.modStatus, "intro_flag": intro_flag}
@@ -168,7 +128,17 @@ while True:
             if intro_flag:
                 hat.run(override="happy2")
                 logging.debug("teleop mode")
-                teleop()
+                to.drive(controller.getAxis(controller.Axis.rStickX), controller.getAxis(controller.Axis.rStickY))
+                robot.shootWheel.Set(int(controller.getButton(controller.Button.rBumper)))
+                if controller.getAxis(controller.Axis.lTrigger) > 0.8:
+                    to.pickup()
+                elif controller.getAxis(controller.Axis.rTrigger) > 0.8 and controller.getButton(
+                        controller.Button.rBumper):
+                    to.shoot()
+                else:
+                    to.stop()
+                to.anglehood(controller.getAxis(controller.Axis.lStickY))
+                time.sleep(0.01)
                 if controller.getButton(controller.Button.B):
                     curState = RobotState.stopped
                 if controller.getButton(controller.Button.lStick) and controller.getButton(controller.Button.save):
