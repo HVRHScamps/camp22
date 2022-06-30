@@ -390,3 +390,6 @@ class ModHandler:
         self.testStartTime = 0
         self.runningTests = 0
         self.testSpecific = 0
+        self.robot.rDrive.Set(0)
+        self.robot.lDrive.Set(0)
+        self.robot.shootWheel.Set(0)
